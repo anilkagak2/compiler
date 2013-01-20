@@ -48,6 +48,12 @@ int lex(void){
             return TIMES;
            case '/':
             return DIV;
+           case '=':
+            return EQUAL;
+           case '<':
+            return LT;
+           case '>':
+            return GT;
            case '(':
             return LP;
            case ')':

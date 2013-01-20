@@ -4,9 +4,13 @@
 char    *factor     ( void );
 char    *term       ( void );
 char    *expression ( void );
+char    *relation   ( void );
 
 extern char *newname( void       );
 extern void freename( char *name );
+
+
+
 
 statements()
 {
@@ -16,7 +20,8 @@ statements()
 
     while( !match(EOI) )
     {
-        tempvar = expression();
+        //tempvar = expression();
+        tempvar = relation();
 
         if( match( SEMI ) )
             advance();
@@ -26,6 +31,42 @@ statements()
         freename( tempvar );
     }
 }
+
+
+
+
+
+
+
+
+char    *relation()
+{
+    /* relation -> expression relation'
+     * relation' -> (EQUAL | LT | GT) expression relation'' |  epsilon
+     */
+
+    char  *tempvar, *tempvar2;
+    int equal;
+    int lt;
+
+tempvar = expression();
+while( ( equal = match( EQUAL ) ) || ( lt = match( LT )) || match( GT ) )
+{
+    advance();
+    tempvar2 = expression();
+        if( equal )
+        printf("    %s = %s == %s\n", tempvar, tempvar, tempvar2 );
+        else if( lt )
+        printf("    %s = %s < %s\n", tempvar, tempvar, tempvar2 );
+        else
+        printf("    %s = %s > %s\n", tempvar, tempvar, tempvar2 );
+        freename( tempvar2 );
+    }
+
+    return tempvar;
+}
+
+
 
 char    *expression()
 {
@@ -91,7 +132,8 @@ char    *factor()
     else if( match(LP) )
     {
         advance();
-        tempvar = expression();
+        //tempvar = expression();
+        tempvar = relation();
         if( match(RP) )
             advance();
         else

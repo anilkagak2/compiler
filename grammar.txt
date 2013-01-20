@@ -1,0 +1,15 @@
+stmt → id := rel
+	| if rel then stmt
+	| while rel do stmt
+	| begin opt_stmts end 
+opt_stmts → stmt_list |є
+stmt_list  → stmt_list; stmt | stmt
+
+rel -> expr rel'
+rel' -> (=<>) expr rel' | e
+
+expr  -> term expr'
+expr' -> (-+)term expr' | e
+term -> factor term'
+term' -> (*/)factor term' | e
+factor -> number | (rel)
