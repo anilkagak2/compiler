@@ -17,33 +17,27 @@ statements()
 	            | begin opt_stmts end
     */
     printf("in statements : ------- %s\n",yytext);
-    char *tempvar;
 
-    while( !match(EOI) )
-    {
-        
-        //tempvar = expression();
+    //while( !match(EOI) ){
+
         if( match( BEGIN ) ){
-//        printf("test\n");
+            printf("1\n");
             advance();
             opt_stmts();
-//            if(match(EOI))printf("syntax not correct\n");
 
-            if( !match( END ) ) {
-                fprintf(stderr, "%d: syntax error : missing end\n",yylineno );
-            }
             if ( match (END)) {
+                printf("2\n");
                 advance();
-//                return;
             }
-         }
-//        else if ( match (EOI) )
-
-        else if (match (EOI)) {
-            printf("no begin: exit\n");
-            exit(2);
+            else
+            fprintf(stderr, "%d: syntax error : missing end\n",yylineno );
         }
-printf ("current token is %s\n",yytext+yyleng);
+        else if( match( EOI ) ) return;
+        //Enter other else ifs such as 'if then', 'while-do' here 
+        else{
+            printf("should start with 'begin'.\n");
+        }
+//printf ("current token is %s\n",yytext+yyleng);
 //        advance();
         /*
         tempvar = relation();
@@ -55,7 +49,7 @@ printf ("current token is %s\n",yytext+yyleng);
 
         freename( tempvar );
         */
-    }
+    //}
 
 }
 
@@ -64,7 +58,7 @@ opt_stmts(){
     printf("in opt_statements : ------ %s\n",yytext);
     // example : "begin end"
     if( !match( END ) ){  
-        printf("opt_list : not END \n"); 
+    //    printf("opt_list : not END \n"); 
         stmt_list();
     }
 
@@ -78,7 +72,7 @@ stmt_list(){
     {
         advance();
         statements();
-        fprintf(stdout," statement list ");
+      //  fprintf(stdout," statement list ");
     } 
 
 }

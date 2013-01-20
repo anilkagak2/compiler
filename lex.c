@@ -1,7 +1,8 @@
 #include "lex.h"
 #include <stdio.h>
 #include <ctype.h>
-
+#include <string.h>
+#define MAX_LEN 1024
 
 char* yytext = ""; /* Lexeme (not '\0'
                       terminated)              */
@@ -69,6 +70,20 @@ int lex(void){
                while(isalnum(*current))
                   ++current;
                yyleng = current - yytext;
+               
+               char token[MAX_LEN];
+               strncpy(token,yytext,yyleng);
+               token[yyleng] = '\0';
+
+               if(strcmp(token,"begin") == 0 ){
+                    printf("in BEGIN\n");
+                   return BEGIN; 
+               }
+                else if(strcmp(token,"end") == 0 ){
+                 
+                    printf("in END\n");
+                    return END; 
+                }
                return NUM_OR_ID;
             }
             break;
