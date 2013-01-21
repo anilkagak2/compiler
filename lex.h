@@ -4,7 +4,7 @@
 #define TIMES		3	/* * 				*/
 #define LP		    4	/* (				*/
 #define RP		    5	/* )				*/
-#define NUM_OR_ID	6	/* Decimal Number or Identifier */
+#define NUM     	6	/* Decimal Number or Identifier */
 #define MINUS       7
 #define DIV         8
 #define EQUAL       9
@@ -19,6 +19,7 @@
 #define DO          17
 #define ASSIGN      18
 
+#define ID          19
 extern char *yytext;		/* in lex.c			*/
 extern int yyleng;
 extern yylineno;

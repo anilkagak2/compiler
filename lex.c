@@ -63,6 +63,14 @@ int lex(void){
            case '\t':
            case ' ' :
             break;
+           case ':':
+                if(*(current+1) == '='){
+                    current +=2;
+                    yyleng = current - yytext;
+                    printf("in assing\n");
+                    return ASSIGN;
+                }
+                break;
            default:
             if(!isalnum(*current))
                fprintf(stderr, "Agvonse la8emevn eisagwgn <%c>\n", *current);
@@ -74,6 +82,7 @@ int lex(void){
                char token[MAX_LEN];
                strncpy(token,yytext,yyleng);
                token[yyleng] = '\0';
+               
 
                if(strcmp(token,"begin") == 0 ){
             //        printf("in BEGIN\n");
@@ -103,7 +112,11 @@ int lex(void){
                     printf("in ASSIGN\n");
                     return ASSIGN; 
                 }
-               return NUM_OR_ID;
+               else if (isalpha(token[0])){
+                    printf("In ID :- %s \n",token);
+                    return ID;
+               }
+               return NUM;
             }
             break;
          }
