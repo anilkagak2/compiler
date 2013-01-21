@@ -76,13 +76,32 @@ int lex(void){
                token[yyleng] = '\0';
 
                if(strcmp(token,"begin") == 0 ){
-                    printf("in BEGIN\n");
+            //        printf("in BEGIN\n");
                    return BEGIN; 
                }
                 else if(strcmp(token,"end") == 0 ){
-                 
-                    printf("in END\n");
+             //       printf("in END\n");
                     return END; 
+                }
+                else if(strcmp(token,"if") == 0 ){
+                    printf("in IF\n");
+                    return IF; 
+                }
+                else if(strcmp(token,"then") == 0 ){
+                    printf("in THEN\n");
+                    return THEN; 
+                }
+                else if(strcmp(token,"while") == 0 ){
+                    printf("in WHILE\n");
+                    return WHILE; 
+                }
+                else if(strcmp(token,"do") == 0 ){
+                    printf("in DO\n");
+                    return DO; 
+                }
+                else if(strcmp(token,":=") == 0 ){
+                    printf("in ASSIGN\n");
+                    return ASSIGN; 
                 }
                return NUM_OR_ID;
             }

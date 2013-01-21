@@ -13,6 +13,11 @@
 
 #define BEGIN       12
 #define END         13
+#define IF          14
+#define THEN        15
+#define WHILE       16
+#define DO          17
+#define ASSIGN      18
 
 extern char *yytext;		/* in lex.c			*/
 extern int yyleng;

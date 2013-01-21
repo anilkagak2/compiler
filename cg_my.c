@@ -16,21 +16,53 @@ statements()
 	            | while relation do statements
 	            | begin opt_stmts end
     */
-    printf("in statements : ------- %s\n",yytext);
+//    printf("in statements : ------- %s\n",yytext);
 
     //while( !match(EOI) ){
 
         if( match( BEGIN ) ){
-            printf("1\n");
+            printf("begin\n");
             advance();
             opt_stmts();
 
             if ( match (END)) {
-                printf("2\n");
+                printf("end\n");
                 advance();
             }
             else
             fprintf(stderr, "%d: syntax error : missing end\n",yylineno );
+        }
+
+        else if (match (IF)) {
+            advance ();
+            char *tempvar = relation ();
+
+            if (match (THEN)) {
+                advance ();
+                printf ("   if %s then\n", tempvar);
+                statements ();
+            }
+            else {
+                fprintf (stderr,"%d: missing then\n",yylineno);
+            }
+
+            freename (tempvar);
+        }
+ 
+        else if (match (WHILE)) {
+            advance ();
+            char *tempvar = relation ();
+
+            if (match (DO)) {
+                advance ();
+                printf ("   while %s do\n", tempvar);
+                statements ();
+            }
+            else {
+                fprintf (stderr,"%d: missing do\n",yylineno);
+            }
+
+            freename (tempvar);
         }
         else if( match( EOI ) ) return;
         //Enter other else ifs such as 'if then', 'while-do' here 
@@ -54,19 +86,16 @@ statements()
 }
 
 opt_stmts(){
-
-    printf("in opt_statements : ------ %s\n",yytext);
+//    printf("in opt_statements : ------ %s\n",yytext);
     // example : "begin end"
     if( !match( END ) ){  
     //    printf("opt_list : not END \n"); 
         stmt_list();
     }
-
 }
 
 stmt_list(){
-
-    printf("in statements_list : ------ %s\n",yytext);
+//    printf("in statements_list : ------ %s\n",yytext);
     statements();
     while( match( SEMI ) )
     {
