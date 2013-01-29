@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "lex.h"
 #include <string.h>
 
@@ -30,8 +31,11 @@ statements()
                 printf("end\n");
                 advance();
             }
-            else
-            fprintf(stderr, "%d: syntax error : missing end\n",yylineno );
+            else {
+	    fprintf(stderr, "%d: syntax error : missing end\n",yylineno );
+            fprintf(stderr, "Error : exiting..\n",yylineno );
+		exit (1);
+		}
         }
 
         else if (match (IF)) {
@@ -45,6 +49,8 @@ statements()
             }
             else {
                 fprintf (stderr,"%d: missing then\n",yylineno);
+            fprintf(stderr, "Error : exiting..\n",yylineno );
+		exit (1);
             }
 
             freename (tempvar);
@@ -57,12 +63,14 @@ statements()
             if (match (DO)) {
                 advance ();
                 printf ("   while %s do\n", tempvar);
-                statements ();
             }
             else {
                 fprintf (stderr,"%d: missing do\n",yylineno);
+            fprintf(stderr, "Error : exiting..\n",yylineno );
+		exit (1);
             }
 
+                statements ();
             freename (tempvar);
         }
  
@@ -80,6 +88,8 @@ statements()
             }else{
 
                 printf("%d:missing ASSIGN opertor\n",yylineno);
+            fprintf(stderr, "Error : exiting..\n",yylineno );
+		exit (1);
             }
 
         }
@@ -89,6 +99,8 @@ statements()
 		return;
         else{
             printf("Please check the grammar.\n");
+            fprintf(stderr, "Error : exiting..\n",yylineno );
+		exit (1);
         }
 
 }
@@ -214,11 +226,17 @@ char    *factor()
         tempvar = relation();
         if( match(RP) )
             advance();
-        else
+        else  {
             fprintf(stderr, "%d: Mismatched parenthesis\n", yylineno );
+            fprintf(stderr, "Error : exiting..\n",yylineno );
+		exit (1);
+	}
     }
-    else
+    else {
         fprintf( stderr, "%d: Number or identifier expected\n", yylineno );
+            fprintf(stderr, "Error : exiting..\n",yylineno );
+		exit (1);
+	}
 
     return tempvar;
 }
