@@ -67,7 +67,7 @@ int lex(void){
                 if(*(current+1) == '='){
                     current +=2;
                     yyleng = current - yytext;
-                    printf("in assing\n");
+//                    printf("in assing\n");
                     return ASSIGN;
                 }
                 break;
@@ -93,27 +93,28 @@ int lex(void){
                     return END; 
                 }
                 else if(strcmp(token,"if") == 0 ){
-                    printf("in IF\n");
+ //                   printf("in IF\n");
                     return IF; 
                 }
                 else if(strcmp(token,"then") == 0 ){
-                    printf("in THEN\n");
+   //                 printf("in THEN\n");
                     return THEN; 
                 }
                 else if(strcmp(token,"while") == 0 ){
-                    printf("in WHILE\n");
+     //               printf("in WHILE\n");
                     return WHILE; 
                 }
                 else if(strcmp(token,"do") == 0 ){
-                    printf("in DO\n");
+       //             printf("in DO\n");
                     return DO; 
                 }
                 else if(strcmp(token,":=") == 0 ){
-                    printf("in ASSIGN\n");
+         //           printf("in ASSIGN\n");
                     return ASSIGN; 
                 }
+		// Check for the ID before assignment
                else if (isalpha(token[0])){
-                    printf("In ID :- %s \n",token);
+//                    printf("In ID :- %s \n",token);
                     return ID;
                }
                return NUM;

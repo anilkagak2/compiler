@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "lex.h"
+#include <string.h>
 
 char    *factor     ( void );
 char    *term       ( void );
@@ -67,8 +68,8 @@ statements()
  
         else if (match (ID)) {
             char id[1024];
-            strncpy(id,yytext,yyleng);
-            id[yyleng] = '\0';
+	    strncpy(id,yytext,yyleng);
+	    id[yyleng] = '\0';
             advance ();
     
             if(match(ASSIGN)){
@@ -84,12 +85,11 @@ statements()
         }
 
 
-        else if( match( EOI ) ) return;
-        //Enter other else ifs such as 'if then', 'while-do' here 
+        else if( match( EOI ) ) 
+		return;
         else{
             printf("Please check the grammar.\n");
         }
-        //}
 
 }
 
@@ -113,33 +113,6 @@ stmt_list(){
     } 
 
 }
-
-
-/*
-   statements()
-   {
-   */   /*  statements -> expression SEMI  |  expression SEMI statements  */
-
-/*    char *tempvar;
-
-      while( !match(EOI) )
-      {
-//tempvar = expression();
-tempvar = relation();
-
-if( match( SEMI ) )
-advance();
-else
-fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
-
-freename( tempvar );
-}
-}*/
-
-
-
-
-
 
 
 

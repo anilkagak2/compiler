@@ -1,18 +1,19 @@
-stmt → id := rel
+stmt → 	id := rel
 	| if rel then stmt
 	| while rel do stmt
 	| begin opt_stmts end 
-opt_stmts → stmt_list |є
 
-/*stmt_list  → stmt_list; stmt | stmt */
-stmt_list -> stmt stmt_list'
-stmt_list' -> ; stmt stmt_list' | e
+opt_stmts → stmt_list | є
 
-rel -> expr rel'
-rel' -> (=<>) expr rel' | e
+/* stmt_list  →  stmt_list; stmt | stmt */
+stmt_list  →  stmt stmt_list'
+stmt_list' →  ; stmt stmt_list' | e
 
-expr  -> term expr'
-expr' -> (-+)term expr' | e
-term -> factor term'
-term' -> (*/)factor term' | e
-factor -> number | (rel)
+rel 	→  expr rel'
+rel'  	→  (=<>) expr rel' | e
+
+expr   	→  term expr'
+expr' 	→  (-+)term expr' | e
+term  	→  factor term'
+term' 	→  (*/)factor term' | e
+factor 	→  number | id | (rel)
