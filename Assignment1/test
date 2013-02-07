@@ -1,0 +1,6 @@
+if a < b then
+	if c <d then
+		begin
+			k := x + y;
+			z := a+b
+		end
