@@ -1,19 +1,19 @@
 #include "declarations.h"
 
-    
 
-dfa::dfa (){
-    num_states = 0;
+void
+dfa::reset(){
+    current_state = num_states - 2; 
 }
 
-bool
-dfa::match(string s){
-    int cur_state = num_states - 2;
-    for(int i=0; i<s.length(); i++){
-        cur_state = transitions[cur_state][s[i]];
-    }
-    if(final[cur_state])return true;
-    else return false;
+bool 
+dfa::peek_rejecting(char c){
+    return rejecting[transitions[current_state][c]]; 
+}
+
+void 
+dfa::advance(char c){
+    current_state = transitions[current_state][c];
 }
 
 dfa::dfa (int num_states, set<char>alphabet,vector<vector<int> >	transitions,vector<bool> final){
@@ -22,18 +22,20 @@ dfa::dfa (int num_states, set<char>alphabet,vector<vector<int> >	transitions,vec
 	this->alphabet = alphabet;
 	this->final = final;
 	this->transitions = transitions;	
+   
+    calculate_reject();
 }
 
 void 
-dfd::calculate_reject(){
-    
+dfa::calculate_reject(){
+    rejecting.resize(num_states);
     for(int i=0 ; i<num_states; i++){
         
         bool can_not_reach_final = true;
         queue<int> q;
         vector<bool> done(num_states,0);
         
-        q.insert(i);
+        q.push(i);
         done[i] = 1;
 
         while(!q.empty()){

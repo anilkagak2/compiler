@@ -8,6 +8,7 @@
 #include <map>
 #include <stack>
 #include <algorithm>
+#include <queue>
 
 using namespace std;
 
@@ -44,6 +45,7 @@ class dfa {
     vector<bool> final;
     vector< vector<int> > transitions;
     int current_state; // start_state = num_states-2
+    vector<bool> rejecting;
 
 //Set of states of DFA mapped with the set of corresponding states of NFA
 	// eg : Dstates[1] = {1,2,3}
@@ -52,7 +54,11 @@ class dfa {
 	dfa ();
     dfa (int num_states,set<char> alphabet,vector<vector<int> > transitions,vector<bool> final);
 	void print_transitions();    
-	void print_final();   
-	bool match(string s);
+	void print_final();  
+    
+    void calculate_reject();
+    void reset();
+	void advance(char c);
+    bool peek_rejecting(char c);
 };
 
