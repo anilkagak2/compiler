@@ -27,6 +27,10 @@ class nfa {
     nfa union_nfa (nfa &n);
     nfa kleene_star_nfa ();
     nfa concate_nfa (nfa &n);
+	set<int> eps_closure(int state);
+	set<int> eps_closure(set<int> state);
+	set<int> move(set<int> states,char alpha);
+
 };
 
 class dfa {
@@ -34,18 +38,18 @@ class dfa {
     int num_states;
 //    map<char,int> alphabet;
 	set <char> alphabet;
-//    vector<bool> final;
+	 vector<bool> final;
     vector< vector<int> > transitions;
 
 	//Set of states of DFA mapped with the set of corresponding states of NFA
 	// eg : Dstates[1] = {1,2,3}
 	vector< set<int> > Dstates;
-
-	nfa n;
-
-    dfa ();
-    dfa (nfa);
-	set<int> move(int state,char alpha);
-	set<int> eps_closure(int state);
+    
+	dfa ();
+	dfa (int num_states,set<char>
+					alphabet,
+					vector<vector<int> >
+					transitions,vector<bool> final);
 };
+
 
