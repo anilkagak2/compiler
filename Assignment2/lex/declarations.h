@@ -17,7 +17,7 @@ using namespace std;
 class dfa;
 
 class nfa {
-    
+    public:   
     int num_states;
     set<char> alphabet;
     vector< vector< set<int> > > transitions;
@@ -27,6 +27,8 @@ class nfa {
     void union_nfa (nfa &n);
     void kleene_star_nfa ();
     void concate_nfa (nfa &n);
+    void print_transitions ();
+
 	set<int> eps_closure(int state);
 	set<int> eps_closure(set<int> state);
 	set<int> move(set<int> states,char alpha);
@@ -36,7 +38,7 @@ class nfa {
 };
 
 class dfa {
-    
+    public:
     int num_states;
     set<char> alphabet;
     vector<bool> final;
@@ -47,7 +49,6 @@ class dfa {
 	vector< set<int> > Dstates;
     
 	dfa ();
-    public:
     dfa (int num_states,set<char> alphabet,vector<vector<int> > transitions,vector<bool> final);
     
     	bool match(string s);
