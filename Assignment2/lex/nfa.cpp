@@ -117,7 +117,8 @@ nfa::build_nfa (string regex) {
         a = n;             
     }
 
-//    a.print_transitions ();
+    cout<<"final: "<<endl;
+    a.print_transitions ();
     *this = a;
 }
 
@@ -140,6 +141,7 @@ nfa::regex_to_postfix (string r) {
                     char op = st.top ();
                     while (op != '(' && !st.empty ()) {
                         postfix += op;
+                        cout << "postfix " << postfix << endl;
                         st.pop ();
                         op = st.top ();
                     }
@@ -147,6 +149,7 @@ nfa::regex_to_postfix (string r) {
                         cerr << "No matching brace for ) at " << i << endl;
                         exit (EXIT_FAILURE);
                     }
+                    st.pop ();  // pop '('
                 } else {
                     cerr << "No matching brace for ) at " << i << endl;
                     exit (EXIT_FAILURE);
@@ -156,7 +159,7 @@ nfa::regex_to_postfix (string r) {
 
                 // union operator
             case '|': 
-                while (!st.empty ()) {
+                while (!st.empty () && st.top()=='*') {
                     char op = st.top ();
                     if (op == '|') break;
                     postfix += op;
@@ -173,6 +176,11 @@ nfa::regex_to_postfix (string r) {
                 break;
 
             default :
+                while (!st.empty () && st.top()=='*') {
+                    postfix += '*';
+                    st.pop ();
+                }
+
                 postfix += r[i];
         }
 
