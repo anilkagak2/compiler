@@ -307,6 +307,16 @@ nfa::concate_nfa (nfa &n) {
     print_transitions();
 }
 
+
+void show_set(set<int> s){
+		set<int>::iterator it;
+		for(it=s.begin();it!=s.end();it++){
+				cout << " " << *it;
+		}
+
+}
+
+
 set<int>
 nfa::eps_closure(int state){
     set<int>::iterator it;
@@ -323,8 +333,12 @@ nfa::eps_closure(int state){
                 output.insert(*it);
                 stk.push(*it);
             }
-        }		
+        }
+		output.insert(top);		
     }
+//	cout << "\ne-closure of state : "<<state <<" : ";
+//	show_set(output);
+
     return output;	
 }
 
@@ -337,6 +351,8 @@ set<int> nfa::eps_closure(set<int> states_nfa){
         set<int> e_closure_nfa = eps_closure(*it);
         output.insert(e_closure_nfa.begin(),e_closure_nfa.end());
     }
+//	cout << "\n e-closure of ";show_set(states_nfa);
+//	cout << " is ---> ";show_set(output);
     return output;
 }
 
@@ -348,6 +364,9 @@ nfa::move(set<int> states_nfa,char alpha){
         set<int> to_move = transitions[*it][alpha];
         output.insert(to_move.begin(),to_move.end());
     }
+//	cout << "\nin move for " << alpha << endl;
+//	cout << "\ninput set ";show_set(states_nfa);
+//	cout << "\noutput set ";show_set(output);
     return output;
 
 }
@@ -366,6 +385,7 @@ dfa
 nfa::to_dfa(){
 
     vector< vector<int> > Dtable;
+
     vector< set<int> > Dstates;
     //Dstate index which are marked
     vector<bool> marked;
@@ -378,7 +398,10 @@ nfa::to_dfa(){
     Dstates.push_back(set<int>(eps_closure(start_state)));
     marked.push_back(false);
 
-    //Do untill all states are marked
+	//Row containing the mappig of current states with all alphabet 
+	vector<int> row_alpha(MAX_ALPHABET);
+
+	//Do untill all states are marked
     bool token = true;
     while(token){
         token = false;
@@ -392,35 +415,48 @@ nfa::to_dfa(){
         if(token){
             marked[i] = true;
             set<char>::iterator it;
-            //For each input symbol iti
 
+            //For each input symbol 
             for(it=alphabet.begin();it!=alphabet.end();it++){
-                set<int> U = eps_closure(move(Dstates[i],(*it)));
+                if(*it == EPSILON)
+						continue;
+				
+				set<int> U = eps_closure(move(Dstates[i],(*it)));
+				int j;
+				bool is_present = false;
+				for(j=0;j<Dstates.size();j++){
+						if(Dstates[j] == U){
+							row_alpha[*it] = j;
+							is_present = true;
+							break;
+						}
+				}
+			
+				//cout << "in to_dfa\n";
+				//If U is not in Dstates
+				if(!is_present){
+						Dstates.push_back(U);
+						marked.push_back(false);
+						row_alpha[*it] = Dstates.size()-1;
+				}
+			}
 
-                int j;
-                for(j=0;j<Dstates.size();j++){
-                    if(Dstates[j] == U){
-                        Dtable[i][*it] = j;
-                        break;
-                    }
-                }
-                //If U is not in Dstates
-                if(Dtable[i][*it] != j){
-                    Dstates.push_back(U);
-                    marked.push_back(false);
-                    Dtable[i][*it] = Dstates.size()-1;
-                }
-            }
-        }
-    }
-    for(int k=0;k< Dstates.size();k++){
-        set<int> nfa_states = Dstates[k];
-        if(find(nfa_states.begin(),nfa_states.end(),final_state) == nfa_states.end())
-            final.push_back(false);
-        final.push_back(true);
+				Dtable.push_back(row_alpha);
+		}
+	}
+//	cout << "\nDstates " << endl;
+	for(int k=0;k< Dstates.size();k++){
+			set<int> nfa_states = Dstates[k];
+//			cout << "\n " << k << " : ";show_set(nfa_states);
+			if(find(nfa_states.begin(),nfa_states.end(),final_state) == nfa_states.end())
+					final.push_back(false);
+			else
+					final.push_back(true);
 
-    }
-    dfa converted(Dstates.size(),alphabet,Dtable,final);
-    return converted;
+	}
+	set<char> alp_without_epsilon = alphabet;
+	alp_without_epsilon.erase(EPSILON);
+	dfa converted(Dstates.size(),alp_without_epsilon,Dtable,final);
+	return converted;
 }
 

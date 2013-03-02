@@ -2,9 +2,10 @@
 
 int main() {
     string re = "ab";
-//    re = "a*";
+    re = "a|b";
     nfa n(re);
-
-//    n.print_transitions ();
+	dfa d = n.to_dfa();
+    d.print_transitions ();
+	d.print_final();
     return 0;
 }
