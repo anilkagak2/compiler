@@ -1,10 +1,10 @@
 #include "declarations.h"
 
 int main() {
-    string re = "ab";
+    string re = "abc";
 //    re = "a*";
     nfa n(re);
 
-//    n.print_transitions ();
+    n.print_transitions ();
     return 0;
 }
