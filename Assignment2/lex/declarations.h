@@ -1,16 +1,20 @@
 #include <cstdio>
 #include <iostream>
-#include <cstlib>
+#include <cstdlib>
 #include <string>
 #include <cstring>
 #include <vector>
 #include <set>
 #include <map>
+#include <stack>
+
 
 using namespace std;
 
 #define EPSILON	'$'
 #define MAX_ALPHABET 256
+
+class dfa;
 
 class nfa {
     
@@ -20,9 +24,9 @@ class nfa {
 
         nfa (string regex);
     dfa to_dfa (); 
-    nfa union_nfa (nfa &n);
-    nfa kleene_star_nfa ();
-    nfa concate_nfa (nfa &n);
+    void union_nfa (nfa &n);
+    void kleene_star_nfa ();
+    void concate_nfa (nfa &n);
 
     private:
 	void build_nfa (string regex);

@@ -39,12 +39,12 @@ nfa::build_nfa (string regex) {
 
 	// go on evaluate the postfix expression over the operators *,| & concate
 	for (int i=0; i<n; i++) 
-		switch p[i] {
+		switch (p[i]) {
 			/* create nfa for '|' */
 			case '|':
 				if (!st.empty ()) {
 					nfa n1 = st.top ();	st.pop ();
-					if (!n2.empty ()) {
+					if (!st.empty ()) {
 						cerr << "* operator cannot be evaluated" << endl;
 						exit (EXIT_FAILURE);
 					}
@@ -72,7 +72,9 @@ nfa::build_nfa (string regex) {
 				break;
 
 			default :
-				nfa n(p[i]);
+                string re = "";
+                re += p[i];
+				nfa n(re);
 				st.push (n);
 		}
 
@@ -96,7 +98,7 @@ nfa::regex_to_postfix (string r) {
 
 	// use stack to arrange operators according to the precedence
 	for (int i=0; i<n; i++) 
-		switch r[i] {
+		switch (r[i]) {
 			// pop till previous operators
 			case ')':
 				if (!st.empty ()) {
@@ -120,7 +122,7 @@ nfa::regex_to_postfix (string r) {
 				// union operator
 			case '|': 
 				while (!st.empty ()) {
-					op = st.top ();
+					char op = st.top ();
 					if (op == '|') break;
 					postfix += op;
 					st.pop ();
@@ -161,9 +163,11 @@ nfa::union_nfa (nfa &n) {
 	for (int i=0; i<states_add; i++) {
 		for (int j=0; j<n.transitions[i].size (); j++) {
 			set<int>::iterator it;
+            set<int> n_set;
 			for (it=n.transitions[i][j].begin (); it != n.transitions[i][j].end (); it++) {
-				*it += num_states;	// increment the state index with this->new_states
+                n_set.insert (*it + num_states);
 			}
+            transitions[i][j] = n_set;
 		}
 		transitions.push_back (n.transitions[i]);
 	}
@@ -210,15 +214,16 @@ nfa::kleene_star_nfa () {
 
 void
 nfa::concate_nfa (nfa &n) {
-   
     int states_add = n.transitions.size ();
 
 	for (int i=0; i<states_add; i++) {
 		for (int j=0; j<n.transitions[i].size (); j++) {
 			set<int>::iterator it;
+            set<int> n_set;
 			for (it=n.transitions[i][j].begin (); it != n.transitions[i][j].end (); it++) {
-				*it += num_states;	// increment the state index with this->new_states
+                n_set.insert (*it + num_states);
 			}
+            transitions[i][j] = n_set;
 		}
 		transitions.push_back (n.transitions[i]);
 	}
@@ -243,20 +248,25 @@ nfa::concate_nfa (nfa &n) {
 	transitions.push_back (final_new);
 	*/
 
-    vector< set<int> > start;
+    vector< set<int> > start_row;
 	start_row = transitions[old_start_1];
-    transitions.erase(old_start_1);
+    transitions.erase(transitions.begin() + old_start_1);
     transitions.insert(transitions.begin()+transitions.size()-2,start_row);
     
 	for (int i=0; i<transitions.size(); i++) {
 		for (int j=0; j<transitions[i].size (); j++) {
 			set<int>::iterator it;
-			for (it=n.transitions[i][j].begin (); it != n.transitions[i][j].end (); it++) {
+            set<int> n_set;
+            for (it=n.transitions[i][j].begin (); it != n.transitions[i][j].end (); it++) {
                 
                 if(*it >= (num_states-1) && *it <= (num_states + n.num_states - 2)){
-                    *it -= 1;	// decrement the state index with 1 if its index was changed during erase and insert process.
-			    }
+                    //*it -= 1;	// decrement the state index with 1 if its index was changed during erase and insert process.
+			        n_set.insert(*it-1);
+                }
+                else 
+                n_set.insert(*it);
             }
+            transitions[i][j] = n_set;
 		}
 	}
     
@@ -265,10 +275,6 @@ nfa::concate_nfa (nfa &n) {
 
 }
 
-set<int> 
-nfa::eps_closure(int state){
-	set<int> to_return;
-}
 
 
 
