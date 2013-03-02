@@ -6,6 +6,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <algorithm>
 
 using namespace std;
 
@@ -31,10 +32,20 @@ class nfa {
 class dfa {
     
     int num_states;
-    map<char,int> alphabet;
-    vector<bool> final;
+//    map<char,int> alphabet;
+	set <char> alphabet;
+//    vector<bool> final;
     vector< vector<int> > transitions;
 
+	//Set of states of DFA mapped with the set of corresponding states of NFA
+	// eg : Dstates[1] = {1,2,3}
+	vector< set<int> > Dstates;
+
+	nfa n;
+
     dfa ();
+    dfa (nfa);
+	set<int> move(int state,char alpha);
+	set<int> eps_closure(int state);
 };
 
