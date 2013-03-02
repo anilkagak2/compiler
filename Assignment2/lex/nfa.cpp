@@ -43,6 +43,7 @@ nfa::union_nfa (nfa &n) {
 	num_states += n.num_states + 2;
 	transitions.push_back (start_new);
 	transitions.push_back (final_new);
+	return this;
 }
 
 nfa
