@@ -1,5 +1,0 @@
-if a<4 then
-	begin
-	b := 3*6;
-	c:=5/6
-	end
