@@ -28,7 +28,6 @@ nfa::nfa (string regex) {
     build_nfa (regex);
 }
 
-<<<<<<< HEAD
 /* 
  * Makes NFA from the regex
  */
@@ -155,10 +154,7 @@ nfa::regex_to_postfix (string r) {
 /*
  * Union of two nfa's: this & n
  */
-nfa
-=======
 void
->>>>>>> bc0aa81fd3caed00f714895a1df543e1696e4033
 nfa::union_nfa (nfa &n) {
 	int states_add = n.transitions.size ();
 
@@ -188,33 +184,7 @@ nfa::union_nfa (nfa &n) {
 
 void
 nfa::kleene_star_nfa () {
-<<<<<<< HEAD
-
-	//get new rows
-	vector< set<int> > start,final;
-	start.resize(MAX_ALPHABET);
-	final.resize(MAX_ALPHABET);
-
-	//some definitions for clarity
-	int old_start = num_states-2;
-	int old_final = num_states-1;
-	int new_start = num_states;
-	int new_final = num_states+1;
-
-	//Add 4 epsilon transitions for kleen star
-	start[EPSILON].insert(old_start);    //new start -> old start
-	start[EPSILON].insert(new_final);    //new start -> new final
-	transitions[old_final][EPSILON].insert(new_final);    //old_final -> new final
-	transitions[old_final][EPSILON].insert(old_start);    //old final -> old start
-
-	//add start and final to transitions
-	transitions.push_back(start);
-	transitions.push_back(final);
-
-	//increase num_states
-	num_states += 2;
-=======
-   
+  
     //get new rows
     vector< set<int> > start(MAX_ALPHABET),final(MAX_ALPHABET);
 
@@ -236,19 +206,11 @@ nfa::kleene_star_nfa () {
 
     //increase num_states
     num_states += 2;
->>>>>>> bc0aa81fd3caed00f714895a1df543e1696e4033
 }
 
 void
 nfa::concate_nfa (nfa &n) {
-<<<<<<< HEAD
-
-	for(int i=0; i< n.transitions.size(); i++){
-
-
-	}
-=======
-    
+   
     int states_add = n.transitions.size ();
 
 	for (int i=0; i<states_add; i++) {
@@ -300,7 +262,6 @@ nfa::concate_nfa (nfa &n) {
     
     alphabet.insert (n.alphabet.begin (), n.alphabet.end ());
 	num_states += n.num_states;
->>>>>>> bc0aa81fd3caed00f714895a1df543e1696e4033
 
 }
 
