@@ -51,8 +51,8 @@ class dfa {
     
 	dfa ();
     dfa (int num_states,set<char> alphabet,vector<vector<int> > transitions,vector<bool> final);
-    
-    bool start_match(char c)
-    bool match(char c);
+	void print_transitions();    
+	void print_final();   
+	bool match(string s);
 };
 

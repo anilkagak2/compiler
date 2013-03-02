@@ -1,13 +1,11 @@
 #include "declarations.h"
 
 int main() {
-    while(1){
-    string re;
-    cin >>  re;
-//    re = "a*";
+    string re = "ab";
+    re = "a|b";
     nfa n(re);
-
-    //n.print_transitions ();
-    }
+	dfa d = n.to_dfa();
+    d.print_transitions ();
+	d.print_final();
     return 0;
 }
