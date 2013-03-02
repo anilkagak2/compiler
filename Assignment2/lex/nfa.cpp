@@ -106,17 +106,19 @@ nfa::build_nfa (string regex) {
                 st.push (n);
         }
 
+    // b
     nfa a = st.top (); st.pop ();
 
     // now pair up the NFA's from top to bottom
     while (!st.empty ()) {
-        nfa n = st.top ();
+        nfa n = st.top ();      // a
         st.pop ();
-        a.concate_nfa (n);
+        n.concate_nfa (a);      // ab
+        a = n;             
     }
 
-//    a.print_transitions ();
-    // YOU NEED TO INSERT THIS NFA a into the current class
+    cout<<"final: "<<endl;
+    a.print_transitions ();
     *this = a;
 }
 
@@ -139,6 +141,7 @@ nfa::regex_to_postfix (string r) {
                     char op = st.top ();
                     while (op != '(' && !st.empty ()) {
                         postfix += op;
+                        cout << "postfix " << postfix << endl;
                         st.pop ();
                         op = st.top ();
                     }
@@ -146,6 +149,7 @@ nfa::regex_to_postfix (string r) {
                         cerr << "No matching brace for ) at " << i << endl;
                         exit (EXIT_FAILURE);
                     }
+                    st.pop ();  // pop '('
                 } else {
                     cerr << "No matching brace for ) at " << i << endl;
                     exit (EXIT_FAILURE);
@@ -155,7 +159,7 @@ nfa::regex_to_postfix (string r) {
 
                 // union operator
             case '|': 
-                while (!st.empty ()) {
+                while (!st.empty () && st.top()=='*') {
                     char op = st.top ();
                     if (op == '|') break;
                     postfix += op;
@@ -172,6 +176,11 @@ nfa::regex_to_postfix (string r) {
                 break;
 
             default :
+                while (!st.empty () && st.top()=='*') {
+                    postfix += '*';
+                    st.pop ();
+                }
+
                 postfix += r[i];
         }
 
@@ -194,16 +203,16 @@ void
 nfa::union_nfa (nfa &n) {
     int states_add = n.transitions.size ();
 
-    cout <<"my transitions " << endl;
+    /*cout <<"my transitions " << endl;
     print_transitions () ;
     cout << "n's trans " ;
-    n.print_transitions ();
+    n.print_transitions ();*/
     for (int i=0; i<states_add; i++) {
         for (int j=0; j<n.transitions[i].size (); j++) {
             set<int>::iterator it;
             set<int> n_set;
             for (it=n.transitions[i][j].begin (); it != n.transitions[i][j].end (); it++) {
-                cout << "*it+num_states " << *it+num_states <<" i j " << i <<" " << j << endl;
+//                cout << "*it+num_states " << *it+num_states <<" i j " << i <<" " << j << endl;
                 n_set.insert (*it + num_states);
             }
             // 
@@ -256,22 +265,24 @@ void
 nfa::concate_nfa (nfa &n) {
     int states_add = n.transitions.size ();
 
-    cout<<"IN concate"<<endl;
+    alphabet.insert (n.alphabet.begin (), n.alphabet.end ());
+ /*   cout<<"IN concate"<<endl;
     print_transitions();
-    n.print_transitions();
+    n.print_transitions(); */
     for (int i=0; i<states_add; i++) {
         for (int j=0; j<n.transitions[i].size (); j++) {
             set<int>::iterator it;
             set<int> n_set;
             for (it=n.transitions[i][j].begin (); it != n.transitions[i][j].end (); it++) {
                 n_set.insert (*it + num_states);
+//                cout<< i <<" "<<j<<" "<<*it+num_states<<endl;
             }
             n.transitions[i][j] = n_set;
         }
         transitions.push_back (n.transitions[i]);
     }
    
-    print_transitions();
+  //  print_transitions();
     //some definitions for clarity
     int old_start_1 = num_states-2;
     int old_final_1 = num_states-1;
@@ -283,7 +294,7 @@ nfa::concate_nfa (nfa &n) {
     vector< set<int> > start_row;
     start_row = transitions[old_start_1];
     transitions.erase(transitions.begin() + old_start_1);
-    transitions.insert(transitions.begin()+transitions.size()-2,start_row);
+    transitions.insert(transitions.begin()+num_states+n.num_states-2,start_row);
 
     for (int i=0; i<transitions.size(); i++) {
         for (int j=0; j<transitions[i].size (); j++) {
@@ -301,10 +312,9 @@ nfa::concate_nfa (nfa &n) {
         }
     }
 
-    alphabet.insert (n.alphabet.begin (), n.alphabet.end ());
     num_states += n.num_states;
-    cout << "UTPUT concat " << endl;
-    print_transitions();
+    //cout << "UTPUT concat " << endl;
+    //print_transitions();
 }
 
 
@@ -399,7 +409,7 @@ nfa::to_dfa(){
     marked.push_back(false);
 
 	//Row containing the mappig of current states with all alphabet 
-	vector<int> row_alpha(MAX_ALPHABET);
+	vector<int> row_alpha(MAX_ALPHABET,-1);
 
 	//Do untill all states are marked
     bool token = true;
