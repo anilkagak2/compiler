@@ -56,9 +56,25 @@ nfa::complex_to_base (string r) {
 			int pos = r.find_first_of (']', i+1);
 			if (pos != string::npos) {
 		 	    char st = r[++i];
+			    char end = r[++i];
+			    if (r[++i] != ']') {
+				cerr << "Currently this range operator is not supported\n";
+				exit (EXIT_FAILURE);
+			    }
+			    else {
+				ret += "(";
+				for (int i=0; i<end-st; i++) {
+					stringstream ss;
+					ss << st+i;
+					ret += ss.str ();
+					if (st+i != end-1) ret += "|";
+				}
+				ret += ")";
+			    }
 			}
-		}
+		} else ret += r[i];
 	}
+	return ret;
 }
 
 /* 
