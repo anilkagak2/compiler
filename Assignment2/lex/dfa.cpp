@@ -3,17 +3,26 @@
 
 void
 dfa::reset(){
-    current_state = num_states - 2; 
+    current_state = 0; 
 }
 
 bool 
 dfa::peek_rejecting(char c){
-    return rejecting[transitions[current_state][c]]; 
+    return rejecting[current_state]; 
+    //return rejecting[transitions[current_state][c]]; 
 }
 
 void 
 dfa::advance(char c){
     current_state = transitions[current_state][c];
+}
+
+void
+dfa::print_rejecting(){
+    for(int i=0; i<num_states; i++)
+        cout<< rejecting[i] <<" ";
+
+    cout<<endl;
 }
 
 dfa::dfa (int num_states, set<char>alphabet,vector<vector<int> >	transitions,vector<bool> final){
@@ -24,7 +33,9 @@ dfa::dfa (int num_states, set<char>alphabet,vector<vector<int> >	transitions,vec
 	this->transitions = transitions;	
    
     calculate_reject();
+    print_rejecting();
 }
+
 
 void 
 dfa::calculate_reject(){
@@ -49,7 +60,7 @@ dfa::calculate_reject(){
             }
 
             for(int j=0; j<transitions[top].size(); j++){
-                if( (transitions[top][j] != -1) && (!done[transitions[top][j]]) ) q.push(j);
+                if( (transitions[top][j] != -1) && (!done[transitions[top][j]]) ) q.push(transitions[top][j]);
             }
         }
 

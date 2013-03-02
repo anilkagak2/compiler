@@ -9,6 +9,7 @@
 #include <stack>
 #include <algorithm>
 #include <queue>
+#include <sstream>
 
 using namespace std;
 
@@ -59,7 +60,8 @@ class dfa {
     dfa (int num_states,set<char> alphabet,vector<vector<int> > transitions,vector<bool> final);
 	void print_transitions();    
 	void print_final();  
-    
+   
+    void print_rejecting();
     void calculate_reject();
     void reset();
 	void advance(char c);

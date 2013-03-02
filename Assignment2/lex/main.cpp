@@ -14,10 +14,12 @@ int main() {
     for(int i=0 ; i< regex.size(); i++){
         nfa n(regex[i]);
         dfas.push_back(n.to_dfa());    
+        dfas[i].print_transitions ();
+	    dfas[i].print_final();
+        cout<<endl;
     }
     
     //d.print_transitions ();
-	//d.print_final();
     string input;
     cin >> input;
 
@@ -35,14 +37,18 @@ int main() {
         int max_advance = -1;
         for(int j=0;j < dfas.size() ; j++){
             //Do not advance if the next state is rejecting
-            for(int i =0; (!dfas[j].peek_rejecting(input[current+i])) && (current+i < input.length()); i++){
+            for(int i =0; current+i < input.length() ;i++){
             
+                dfas[j].advance(input[current+i]); 
                 if(dfas[j].final[dfas[j].current_state]){
                     max_num_chars_to_final[j] = i;
+                    cout<<"j: "<<j<<" "<<i<<endl;
                 }
-                dfas[j].advance(input[current+i]);
+                if(!dfas[j].peek_rejecting(input[current+i]))
+                break;
             }
             if(max_num_chars_to_final[j] > max_advance) max_advance = max_num_chars_to_final[j];
+            cout << max_num_chars_to_final[j] <<endl ;
         }
 
         if(max_advance == -1 || max_advance == 0) {
