@@ -6,15 +6,15 @@ nfa::nfa () {
 }
 
 nfa
-nfa::union_nfa (nfa &n1, nfa &n2) {
+nfa::union_nfa (nfa &n) {
 }
 
 nfa
-nfa::kleene_star_nfa (nfa &n1, nfa &n2) {
+nfa::kleene_star_nfa () {
 }
 
 nfa
-nfa::concate_nfa (nfa &n1, nfa &n2) {
+nfa::concate_nfa (nfa &n) {
 }
 
 

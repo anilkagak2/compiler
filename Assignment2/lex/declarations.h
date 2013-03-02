@@ -13,13 +13,14 @@ class nfa {
     
     int num_states;
     map<char,int> alphabet;
-    vector<bool> final;
+    //vector<bool> final;
+    int final;
     vector< vector< set<int> > > transitions;
 
         nfa ();
     dfa to_dfa (); 
     nfa union_nfa (nfa &n);
-    nfakleene_star_nfa ();
+    nfa kleene_star_nfa ();
     nfa concate_nfa (nfa &n);
 };
 
