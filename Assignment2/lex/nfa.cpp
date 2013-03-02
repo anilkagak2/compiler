@@ -297,12 +297,12 @@ return output;
 }
 
 
-set<int> nfa::eps_closure(set<int> state_nfa){
+set<int> nfa::eps_closure(set<int> states_nfa){
 	set<int>::iterator it;
 	set<int> output;
 
 	for(it=states_nfa.begin();it != states_nfa.end();it++){
-		set<int> e_closure_nfa = n.eps_closure(state);
+		set<int> e_closure_nfa = eps_closure(*it);
 			output.insert(e_closure_nfa.begin(),e_closure_nfa.end());
 	}
 	return output;
@@ -313,7 +313,7 @@ nfa::move(set<int> states_nfa,char alpha){
 		set<int>::iterator it;
 		set<int> output;
 		for(it=states_nfa.begin();it != states_nfa.end();it++){
-				set<int> to_move = n.transitions[*it][alpha];
+				set<int> to_move = transitions[*it][alpha];
 				output.insert(to_move.begin(),to_move.end());
 		}
 		return output;
@@ -337,7 +337,7 @@ nfa::to_dfa(){
 		vector< set<int> > Dstates;
 		//Dstate index which are marked
 		vector<bool> marked;
-		vector<bool> fianl;
+		vector<bool> final;
 
 		vector< set<int> >::iterator Dit;
 		//Start state is defined as
@@ -360,9 +360,10 @@ nfa::to_dfa(){
 				if(token){
 						marked[i] = true;
 						set<char>::iterator it;
-						//For each input symbol it
+						//For each input symbol iti
+
 						for(it=alphabet.begin();it!=alphabet.end();it++){
-								set<int> U = eps_closure(move(i,*it));
+								set<int> U = eps_closure(move(Dstates[i],(*it)));
 
 								int j;
 								for(j=0;j<Dstates.size();j++){
@@ -387,7 +388,7 @@ nfa::to_dfa(){
 			final.push_back(true);
 
 		}
-		dfa converted = new dfa(Dstates.size(),alphabet,Dtable,final);
+		dfa converted(Dstates.size(),alphabet,Dtable,final);
 		return converted;
 }
 
