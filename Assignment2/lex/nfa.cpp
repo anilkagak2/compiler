@@ -55,8 +55,12 @@ nfa::complex_to_base (string r) {
 		if (r[i] == '[') {
 			int pos = r.find_first_of (']', i+1);
 			if (pos != string::npos) {
-		 	    char st = r[++i];
-			    char end = r[++i];
+		 	    char st = r[++i]; cout << st << endl;
+			    if (r[++i] != '-') { 
+				cerr << "should be used like [a-z]\n";
+				exit (EXIT_FAILURE);
+			    }
+			    char end = r[++i]; cout << end << endl;
 			    if (r[++i] != ']') {
 				cerr << "Currently this range operator is not supported\n";
 				exit (EXIT_FAILURE);
@@ -64,9 +68,7 @@ nfa::complex_to_base (string r) {
 			    else {
 				ret += "(";
 				for (int i=0; i<end-st; i++) {
-					stringstream ss;
-					ss << st+i;
-					ret += ss.str ();
+					ret += static_cast<char>(st+i);
 					if (st+i != end-1) ret += "|";
 				}
 				ret += ")";
@@ -82,6 +84,8 @@ nfa::complex_to_base (string r) {
  */
 void
 nfa::build_nfa (string regex) {
+    regex = complex_to_base (regex);
+    cout << "regex after range operator decoding " << endl;
     string p = regex_to_postfix (regex);	// create postfix from regular expression
     cout << "postfix is " << p << endl;
     int n = p.length ();
