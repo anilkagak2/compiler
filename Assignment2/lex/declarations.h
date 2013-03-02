@@ -15,17 +15,18 @@ using namespace std;
 class nfa {
     
     int num_states;
-//    map<char,int> alphabet;
     set<char> alphabet;
-    //vector<bool> final;
-//    int final;
     vector< vector< set<int> > > transitions;
 
-        nfa ();
+        nfa (string regex);
     dfa to_dfa (); 
     nfa union_nfa (nfa &n);
     nfa kleene_star_nfa ();
     nfa concate_nfa (nfa &n);
+
+    private:
+	void build_nfa (string regex);
+	string regex_to_postfix (string regex);
 };
 
 class dfa {
