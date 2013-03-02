@@ -9,12 +9,16 @@
 
 using namespace std;
 
+#define EPSILON	'$'
+#define MAX_ALPHABET 256
+
 class nfa {
     
     int num_states;
-    map<char,int> alphabet;
+//    map<char,int> alphabet;
+    set<char> alphabet;
     //vector<bool> final;
-    int final;
+//    int final;
     vector< vector< set<int> > > transitions;
 
         nfa ();
