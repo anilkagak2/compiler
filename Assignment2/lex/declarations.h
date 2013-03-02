@@ -43,6 +43,7 @@ class dfa {
     set<char> alphabet;
     vector<bool> final;
     vector< vector<int> > transitions;
+    int current_state; // start_state = num_states-2
 
 //Set of states of DFA mapped with the set of corresponding states of NFA
 	// eg : Dstates[1] = {1,2,3}
@@ -51,6 +52,7 @@ class dfa {
 	dfa ();
     dfa (int num_states,set<char> alphabet,vector<vector<int> > transitions,vector<bool> final);
     
-    	bool match(string s);
+    bool start_match(char c)
+    bool match(char c);
 };
 
