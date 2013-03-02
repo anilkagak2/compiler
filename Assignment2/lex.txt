@@ -1,0 +1,28 @@
+Tokens:
+
+
+Digit           :          0-9
+Letter          :          a-zA-Z
+Preprocessor    :          #define #include
+Keyword         :          int, float, char, if, else, for, return, void
+Identifier      :          (letter+_)(letter+digit+_)*
+Operators       :          + - * / == <= != >= < > =
+Special         :          { } ; , ( ) # " ' // 
+String          :          "*"
+Integer         :          digit+
+Float           :          digit+.digit+
+Whitespace      :          space /t /n
+
+
+
+
+// Potential Improvements
+
+
+
+while do
+array [ ]
+pointers * &
+bitwise & | ^ !
+/* */
+struct
