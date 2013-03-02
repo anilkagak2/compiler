@@ -48,6 +48,19 @@ nfa::print_transitions () {
     cout << "END DELTA" << endl;
 }
 
+string
+nfa::complex_to_base (string r) {
+	string ret = "";
+	for (int i=0; i<r.length (); i++) {
+		if (r[i] == '[') {
+			int pos = r.find_first_of (']', i+1);
+			if (pos != string::npos) {
+		 	    char st = r[++i];
+			}
+		}
+	}
+}
+
 /* 
  * Makes NFA from the regex
  */
@@ -78,6 +91,27 @@ nfa::build_nfa (string regex) {
                     st.push (n2);
                 } else {
                     cerr << "| operator cannot be evaluated" << endl;
+                    exit (EXIT_FAILURE);
+                }
+                break;
+
+            /* create nfa for concatenation */
+            case CONCATE:
+                if (!st.empty ()) {
+                    nfa n1 = st.top ();	st.pop ();
+                    if (st.empty ()) {
+                        cerr << "concate operator cannot be evaluated" << endl;
+                        exit (EXIT_FAILURE);
+                    }
+
+                    nfa n2 = st.top ();	st.pop ();
+                    cout << "CONCATE " << endl;
+                    n2.concate_nfa (n1);
+                    n2.print_transitions ();
+                    cout << "CONCATE END" << endl;
+                    st.push (n2);
+                } else {
+                    cerr << "concate operator cannot be evaluated" << endl;
                     exit (EXIT_FAILURE);
                 }
                 break;
@@ -123,11 +157,37 @@ nfa::build_nfa (string regex) {
 }
 
 /*
+ * Cases where CONCATE operator should occur
+ */
+string
+nfa::insert_concate_op (string r) {
+	string ct; ct=CONCATE;
+	if (r.length () == 1) return r;		// base case
+
+	string ret = "";
+	ret += r[0];
+	char p = r[0];
+	for (int i=1; i<r.length (); i++) {
+		if ((p=='*' && r[i]=='(') ||
+		    (p=='*' && (r[i] != '*' && r[i]!='|' && r[i]!=')' && r[i]!='(')) ||
+		    (p==')' && (r[i] != '*' && r[i]!='|' && r[i]!=')' && r[i]!='(')) ||
+		    (r[i]=='(' && (p != '*' && p!='|' && p!=')' && p!='(')) ||
+		    ((r[i] != '*' && r[i]!='|' && r[i]!=')' && r[i]!='(') 
+			&& (p != '*' && p!='|' && p!=')' && p!='('))) ret += ct + r[i];
+		else ret += r[i];
+		p = r[i];
+	}
+	return ret;
+}
+
+/*
  * Regular expression to postfix expression so as to 
  * ease the evaluation of operations on NFAs
  */
 string
 nfa::regex_to_postfix (string r) {
+    r = insert_concate_op (r);
+    cout << "concate operator inserted: " << r << endl;
     int n = r.length ();
     string postfix = "";
     stack<char> st;
@@ -159,7 +219,7 @@ nfa::regex_to_postfix (string r) {
 
                 // union operator
             case '|': 
-                while (!st.empty () && st.top()=='*') {
+                while (!st.empty () && (st.top()==CONCATE)) {
                     char op = st.top ();
                     if (op == '|') break;
                     postfix += op;
@@ -169,18 +229,23 @@ nfa::regex_to_postfix (string r) {
                 st.push ('|');
                 break;
 
+                // concate operator
+            case CONCATE: 
+                if (!st.empty () && (st.top()==CONCATE)) {
+                    char op = st.top ();
+                    postfix += op;
+                    st.pop ();
+                }
+
+                st.push (CONCATE);
+                break;
+
                 /* for '(' & '*' just push onto the stack. */
             case '(':
-            case '*':
                 st.push (r[i]);
                 break;
 
             default :
-                while (!st.empty () && st.top()=='*') {
-                    postfix += '*';
-                    st.pop ();
-                }
-
                 postfix += r[i];
         }
 

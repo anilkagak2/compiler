@@ -14,6 +14,8 @@ using namespace std;
 #define EPSILON	'$'
 #define MAX_ALPHABET 256
 
+#define CONCATE '#'	// concate operator
+
 class dfa;
 
 class nfa {
@@ -34,7 +36,9 @@ class nfa {
 	set<int> move(set<int> states,char alpha);
     
 	void build_nfa (string regex);
+	string complex_to_base (string regex);
 	string regex_to_postfix (string regex);
+	string insert_concate_op (string regex);
 };
 
 class dfa {
