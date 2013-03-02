@@ -31,10 +31,12 @@ class nfa {
 class dfa {
     
     int num_states;
-    map<char,int> alphabet;
+    //map<char,int> alphabet;
+    set<char> alphabet;
     vector<bool> final;
     vector< vector<int> > transitions;
 
     dfa ();
+    bool match(string s);
 };
 
