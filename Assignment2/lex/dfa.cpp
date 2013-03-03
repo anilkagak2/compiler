@@ -8,8 +8,11 @@ dfa::reset(){
 
 bool 
 dfa::peek_rejecting(char c){
-    return rejecting[current_state]; 
-    //return rejecting[transitions[current_state][c]]; 
+    //return rejecting[current_state]; 
+    if(transitions[current_state][c] == -1)
+        return true;
+    
+    return rejecting[transitions[current_state][c]]; 
 }
 
 void 

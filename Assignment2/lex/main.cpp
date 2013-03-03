@@ -26,9 +26,12 @@ int main() {
     int current=0;
     while(current < input.length()){
        
+        for(int i=0; i<dfas.size(); i++){
+            dfas[i].reset();
+        }
         vector<string> buffer(dfas.size());
         vector<int> max_num_chars_to_final(dfas.size(),-1);
-
+        
         /*
         //If dfa i accepts the string then final state is stored in 
         //this vector and -1 otherwise
@@ -39,16 +42,17 @@ int main() {
             //Do not advance if the next state is rejecting
             for(int i =0; current+i < input.length() ;i++){
             
+                if(dfas[j].peek_rejecting(input[current+i]))
+                break;
+                
                 dfas[j].advance(input[current+i]); 
                 if(dfas[j].final[dfas[j].current_state]){
-                    max_num_chars_to_final[j] = i;
-                    cout<<"j: "<<j<<" "<<i<<endl;
+                    max_num_chars_to_final[j] = i+1;
+        //            cout<<"j: "<<j<<" "<<i<<endl;
                 }
-                if(!dfas[j].peek_rejecting(input[current+i]))
-                break;
             }
             if(max_num_chars_to_final[j] > max_advance) max_advance = max_num_chars_to_final[j];
-            cout << max_num_chars_to_final[j] <<endl ;
+          //  cout << max_num_chars_to_final[j] <<endl ;
         }
 
         if(max_advance == -1 || max_advance == 0) {
@@ -64,8 +68,9 @@ int main() {
             }
         }
 
-        string output(input[current],input[current+max_advance]);
-        cout << accepting_dfa <<" "<<output << endl;
+        string output = input.substr(current,max_advance);
+        //string output(input[current],input[current+max_advance]);
+        cout << "< regex no: "<<accepting_dfa <<" , "<<output<<" >" << endl;
 
         current += max_advance;
 
