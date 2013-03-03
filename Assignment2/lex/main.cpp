@@ -1,13 +1,65 @@
 #include "declarations.h"
+#include <fstream>
+#define BUF_SIZE 1024
+
+string sanitize(string regex) {
+    regex = regex.substr(1,regex.length()-2);
+    string ret="";
+    for(int i=0; i < regex.length(); i++) {
+        if (regex[i] == '$') {
+            ret += ' ';
+        }
+        else if(regex[i]=='\\') {
+            if (i+1 == regex.length ()) break;
+            switch(regex[i+1]){
+                case 't':
+                    ret += '\t';
+                    i++;
+                    break;
+                case 'n':
+                    ret += '\n';
+                    i++;
+                    break;
+                default:
+                    ret += regex[i];
+            }
+        }
+        else{
+            ret += regex[i];
+        }
+    } 
+    return ret;
+}
 
 int main() {
-    //string re = "ab";
-    //re = "a|b";
     
-    vector<string> regex;
-    regex.push_back("a|b");
-    regex.push_back("a*");
+    cout<<"Input filename: "<<endl;
+    string filename = "input_regex.txt";
+ //   cin>>filename;
 
+    ifstream fpi(filename.c_str ());
+    if(!fpi){
+        cout<<"Error in Openeing File: "<< filename<<endl;
+        exit(EXIT_FAILURE);
+    }
+
+    vector<string> token_class;
+    vector<string> regex;
+    string token_class_buf,regex_buf;
+
+    while(!fpi.eof() && fpi>>token_class_buf && fpi>>regex_buf) {
+/*           cout<< "class: " << token_class_buf
+                << " regex: " << regex_buf ;
+           cout <<" BEFORE" << endl; */
+           token_class.push_back(token_class_buf);
+           regex_buf = sanitize(regex_buf);
+           regex.push_back(regex_buf);
+        
+           cout<< "class: " << token_class_buf
+                << " regex: " << regex_buf ;
+           cout <<" DONE" << endl;
+    }
+//    exit(EXIT_FAILURE);
 
     vector<dfa> dfas;
 
@@ -18,10 +70,28 @@ int main() {
 	    dfas[i].print_final();
         cout<<endl;
     }
+   
+    cout<<" Write the index of the regex corresponding to Identifiers class (0 based index) : "<<endl;
+    int id_class;
+    cin >> id_class;
+
+    while(id_class < 0 || id_class >= regex.size()){
+        cout<< "Invalid Id class !! , please write again"<<endl;
+        //exit(EXIT_FAILURE);
+        cin >> id_class;
+    }
+
+    while(1){
+    
+    //symbol table
+    vector< vector<string> > symbol_table(regex.size());
     
     //d.print_transitions ();
+    cout<<"Give input string: "<<endl;
+    char buffer[BUF_SIZE];
     string input;
-    cin >> input;
+    cin.getline( buffer,BUF_SIZE);
+    input = buffer;
 
     int current=0;
     while(current < input.length()){
@@ -69,14 +139,21 @@ int main() {
         }
 
         string output = input.substr(current,max_advance);
+        symbol_table[accepting_dfa].push_back(output);
         //string output(input[current],input[current+max_advance]);
-        cout << "< regex no: "<<accepting_dfa <<" , "<<output<<" >" << endl;
+        cout << "< "<<token_class[accepting_dfa] <<" , "<<output<<" >" << endl;
 
         current += max_advance;
 
         /* -1 -> next is rejecting && present is not final
          *  0 -> " && present is final
          */
+    }
+
+    cout<<"Symbol Table: "<<endl;
+    for(int i=0; i<symbol_table[id_class].size(); i++){
+        cout<<i<<" "<<symbol_table[id_class][i]<<endl;
+    }
     }
     
     return 0;

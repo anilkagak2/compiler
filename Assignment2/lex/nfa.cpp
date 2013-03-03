@@ -60,25 +60,26 @@ nfa::complex_to_base (string r) {
 			if (pos != string::npos) {
 		 	    char st = r[++i]; cout << st << endl;
 			    if (r[++i] != '-') { 
-				cerr << "should be used like [a-z]\n";
+				cout << "should be used like [a-z]\n";
 				exit (EXIT_FAILURE);
 			    }
 			    char end = r[++i]; cout << end << endl;
 			    if (r[++i] != ']') {
-				cerr << "Currently this range operator is not supported\n";
+				cout << "Currently this range operator is not supported\n";
 				exit (EXIT_FAILURE);
 			    }
 			    else {
 				ret += "(";
-				for (int i=0; i<end-st; i++) {
+				for (int i=0; i<=end-st; i++) {
 					ret += static_cast<char>(st+i);
-					if (st+i != end-1) ret += "|";
+					if (st+i != end) ret += "|";
 				}
 				ret += ")";
 			    }
 			}
 		} else ret += r[i];
 	}
+    cout << "compex to base " << ret << endl;
 	return ret;
 }
 
@@ -102,18 +103,18 @@ nfa::build_nfa (string regex) {
                 if (!st.empty ()) {
                     nfa n1 = st.top ();	st.pop ();
                     if (st.empty ()) {
-                        cerr << "| operator cannot be evaluated" << endl;
+                        cout << "| operator cannot be evaluated" << endl;
                         exit (EXIT_FAILURE);
                     }
 
                     nfa n2 = st.top ();	st.pop ();
-                    cout << "UNION " << endl;
+                    //cout << "UNION " << endl;
                     n2.union_nfa (n1);
-                    n2.print_transitions ();
-                    cout << "UNION END" << endl;
+                   // n2.print_transitions ();
+                    //cout << "UNION END" << endl;
                     st.push (n2);
                 } else {
-                    cerr << "| operator cannot be evaluated" << endl;
+                    cout << "| operator cannot be evaluated" << endl;
                     exit (EXIT_FAILURE);
                 }
                 break;
@@ -123,18 +124,18 @@ nfa::build_nfa (string regex) {
                 if (!st.empty ()) {
                     nfa n1 = st.top ();	st.pop ();
                     if (st.empty ()) {
-                        cerr << "concate operator cannot be evaluated" << endl;
+                        cout << "concate operator cannot be evaluated" << endl;
                         exit (EXIT_FAILURE);
                     }
 
                     nfa n2 = st.top ();	st.pop ();
-                    cout << "CONCATE " << endl;
+                    //cout << "CONCATE " << endl;
                     n2.concate_nfa (n1);
-                    n2.print_transitions ();
-                    cout << "CONCATE END" << endl;
+                    //n2.print_transitions ();
+                    //cout << "CONCATE END" << endl;
                     st.push (n2);
                 } else {
-                    cerr << "concate operator cannot be evaluated" << endl;
+                    cout << "concate operator cannot be evaluated" << endl;
                     exit (EXIT_FAILURE);
                 }
                 break;
@@ -145,12 +146,12 @@ nfa::build_nfa (string regex) {
                     nfa n = st.top ();
                     st.pop ();
                     n.kleene_star_nfa ();
-                    cout <<"KLEENE " << endl;
-                    n.print_transitions ();
-                    cout <<"KLEENE END" << endl;
+                    //cout <<"KLEENE " << endl;
+                    //n.print_transitions ();
+                    //cout <<"KLEENE END" << endl;
                     st.push (n);
                 } else {
-                    cerr << "* operator cannot be evaluated" << endl;
+                    cout << "* operator cannot be evaluated" << endl;
                     exit (EXIT_FAILURE);
                 }
                 break;
@@ -159,18 +160,18 @@ nfa::build_nfa (string regex) {
                 string re = "";
 		if (p[i] == '\\') {
 			if (i == p.length ()-1) {
-				cerr << "Evaluation: Not properly escapped\n" << endl;
+				cout << "Evaluation: Not properly escapped\n" << endl;
 				exit (EXIT_FAILURE);
 			}
 			i++;
 		}
 		if (p[i] == EPSILON) {
-			cerr << "Evaluation: Oops..we forgot to mention that $ is treated as EPSILON\n" << endl;
+			cout << "Evaluation: Oops..we forgot to mention that $ is treated as EPSILON\n" << endl;
 			exit (EXIT_FAILURE);
 		}
                 re += p[i];
                 nfa n(re);
-                n.print_transitions ();
+                //n.print_transitions ();
                 st.push (n);
         }
 
@@ -195,6 +196,7 @@ nfa::build_nfa (string regex) {
  */
 string
 nfa::insert_concate_op (string r) {
+    cout << "insert concat " << r << endl;
 	if (r.length () == 1) return r;		// base case
 
 	string ct; ct=CONCATE;
@@ -205,7 +207,7 @@ nfa::insert_concate_op (string r) {
 	int i=1;
 	if (p =='\\') {
 		pesc = true;
-		p = r[++i];	
+		p = r[i++];	
 		ret+=p;
 	}
 
@@ -215,7 +217,7 @@ nfa::insert_concate_op (string r) {
 		if (r[i] == '\\') {
 			esc = true;
 			if (i+1 == r.length ()) {
-				cerr << "Not properly escapped\n" << endl;
+				cout << "Not properly escapped\n" << endl;
 				exit (EXIT_FAILURE);
 			}
 			i++;
@@ -234,19 +236,29 @@ nfa::insert_concate_op (string r) {
 		// p-->char, check r[i]
 		else if (pesc && !esc) {
 		if (r[i]=='(' ||
-		    (r[i] != '*' && r[i]!='|' && r[i]!=')' && r[i]!='(')) ret += ct + r[i];
+		    (r[i] != '*' && r[i]!='|' && r[i]!=')' && r[i]!='(')) {
+            cout << "escapping " << r[i] << endl;
+            ret += ct + r[i];
+        }
 		else ret += r[i];
 		}
 
 		// r[i]-->char, check p
 		else if (!pesc && esc) {
 		if (p=='*' || p==')' ||
-		    (p != '*' && p!='|' && p!=')' && p!='(')) ret += ct + "\\" + r[i];
-		else ret += r[i];
+		    (p != '*' && p!='|' && p!=')' && p!='(')) {
+            cout << "escapping " << r[i] << endl;
+            ret += ct + '\\' + r[i];
+        }
+		else {
+            cout << "ascii is "<<'\\'+r[i] << endl;
+            ret += '\\';  ret += r[i];
+        }
 		}
 
 		else {
-			ret += ct + "\\" + r[i];
+            cout << "escapping " << r[i] << endl;
+			ret += ct + '\\' + r[i];
 		}
 		p = r[i];
 		pesc = esc;
@@ -280,12 +292,12 @@ nfa::regex_to_postfix (string r) {
 						op = st.top ();
 					}
 					if (op != '(') {
-						cerr << "No matching brace for ) at " << i << endl;
+						cout << "No matching brace for ) at " << i << endl;
 						exit (EXIT_FAILURE);
 					}
 					st.pop ();  // pop '('
 				} else {
-					cerr << "No matching brace for ) at " << i << endl;
+					cout << "No matching brace for ) at " << i << endl;
 					exit (EXIT_FAILURE);
 				}
 
@@ -293,9 +305,9 @@ nfa::regex_to_postfix (string r) {
 
 				// union operator
 			case '|': 
-				while (!st.empty () && (st.top()==CONCATE)) {
+				while (!st.empty () && (st.top()==CONCATE || st.top()=='|')) {
 					char op = st.top ();
-					if (op == '|') break;
+//					if (op == '|') break;
 					postfix += op;
 					st.pop ();
 				}
@@ -332,7 +344,7 @@ nfa::regex_to_postfix (string r) {
 	// pop all the operators on the stack
 	while (!st.empty ()) {
 		if (st.top () == '(') {
-			cerr << "No matching brace for ( came in the regex " << endl;
+			cout << "No matching brace for ( came in the regex " << endl;
 			exit (EXIT_FAILURE);
 		}
 		postfix += st.top ();

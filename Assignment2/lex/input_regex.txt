@@ -1,0 +1,10 @@
+Digit               $[0-9]$
+Letter              $[a-z]|[A-Z]$
+Preprocessor        $\#define|\#include$
+Keyword             $int|float|char|if|else|for|return|void|do|while$
+Identifier          $([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*$
+Operators           $+|-|\*|/|==|<=|!=|>=|<|>|=$
+Special             ${|}|;|,|\(|\)|\#|"|'|//$
+Integer             $[0-9][0-9]*$
+Float               $[0-9][0-9]*.[0-9][0-9]*$
+Whitespace          $$|\t|\n$
