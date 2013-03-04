@@ -1,6 +1,22 @@
 #include "declarations.h"
 
 
+bool
+dfa::match(string s){
+    //cout<<"S: "<<s<<" "<<s.length()<<endl;
+    int cur_state = 0;
+    for(int i=0;i<s.length();i++){
+        
+        cur_state = transitions[cur_state][s[i]];
+        if(cur_state == -1){
+            return false;
+        }
+    }
+    //cout<<"state: "<<cur_state<<endl;
+    if(final[cur_state]) return true;
+    else return false;
+}
+
 void
 dfa::reset(){
     current_state = 0; 

@@ -82,79 +82,103 @@ int main() {
     }
 
     while(1){
-    
-    //symbol table
-    vector< vector<string> > symbol_table(regex.size());
-    
-    //d.print_transitions ();
-    cout<<"Give input string: "<<endl;
-    char buffer[BUF_SIZE];
-    string input;
-    cin.getline( buffer,BUF_SIZE);
-    input = buffer;
 
-    int current=0;
-    while(current < input.length()){
-       
-        for(int i=0; i<dfas.size(); i++){
-            dfas[i].reset();
-        }
-        vector<string> buffer(dfas.size());
-        vector<int> max_num_chars_to_final(dfas.size(),-1);
-        
-        /*
-        //If dfa i accepts the string then final state is stored in 
-        //this vector and -1 otherwise
-        vector<int> dfa_accept(dfas.size(),-1);
-        */
-        int max_advance = -1;
-        for(int j=0;j < dfas.size() ; j++){
-            //Do not advance if the next state is rejecting
-            for(int i =0; current+i < input.length() ;i++){
-            
-                if(dfas[j].peek_rejecting(input[current+i]))
-                break;
-                
-                dfas[j].advance(input[current+i]); 
-                if(dfas[j].final[dfas[j].current_state]){
-                    max_num_chars_to_final[j] = i+1;
-        //            cout<<"j: "<<j<<" "<<i<<endl;
+        //symbol table
+        vector< vector<string> > symbol_table(regex.size());
+
+        //d.print_transitions ();
+        cout<<"Give input string: "<<endl;
+        char buffer[BUF_SIZE];
+        string input;
+        cin.getline( buffer,BUF_SIZE);
+        input = buffer;
+
+        int current=0;
+
+        // NO MAXIMAL MUNCH
+#ifndef _MAXIMAL_MATCH_
+        // space separated input
+        stringstream ss(input);
+        string token;
+        while(ss >> token){
+            int i = 0;
+            for(i=0; i<dfas.size(); i++){
+                if(dfas[i].match(token)){
+                    cout << "< "<<token_class[i] <<" , "<<token<<" >" << endl;
+                    if(i == id_class)
+                    symbol_table[i].push_back(token);
+                    break;
                 }
             }
-            if(max_num_chars_to_final[j] > max_advance) max_advance = max_num_chars_to_final[j];
-          //  cout << max_num_chars_to_final[j] <<endl ;
-        }
-
-        if(max_advance == -1 || max_advance == 0) {
-            cout << "Error in lexical Analysis" <<endl; 
-            exit(1);
-        }
-
-        int accepting_dfa = -1;
-        for(int j=0;j < dfas.size() ; j++){
-            if(max_num_chars_to_final[j] == max_advance){
-                accepting_dfa = j;
+            if(i == dfas.size()) {
+                cout << "Token not matched: "<<token<<endl; 
                 break;
             }
         }
+        // end space separated
+#else
+        // MAXIMAL MUNCH IMPLEMENTED
+        while(current < input.length()){
 
-        string output = input.substr(current,max_advance);
-        symbol_table[accepting_dfa].push_back(output);
-        //string output(input[current],input[current+max_advance]);
-        cout << "< "<<token_class[accepting_dfa] <<" , "<<output<<" >" << endl;
+            for(int i=0; i<dfas.size(); i++){
+                dfas[i].reset();
+            }
+            vector<string> buffer(dfas.size());
+            vector<int> max_num_chars_to_final(dfas.size(),-1);
 
-        current += max_advance;
+            /*
+            //If dfa i accepts the string then final state is stored in 
+            //this vector and -1 otherwise
+            vector<int> dfa_accept(dfas.size(),-1);
+            */
+            int max_advance = -1;
+            for(int j=0;j < dfas.size() ; j++){
+                //Do not advance if the next state is rejecting
+                for(int i =0; current+i < input.length() ;i++){
 
-        /* -1 -> next is rejecting && present is not final
-         *  0 -> " && present is final
-         */
+                    if(dfas[j].peek_rejecting(input[current+i]))
+                        break;
+
+                    dfas[j].advance(input[current+i]); 
+                    if(dfas[j].final[dfas[j].current_state]){
+                        max_num_chars_to_final[j] = i+1;
+                        //            cout<<"j: "<<j<<" "<<i<<endl;
+                    }
+                }
+                if(max_num_chars_to_final[j] > max_advance) max_advance = max_num_chars_to_final[j];
+                //  cout << max_num_chars_to_final[j] <<endl ;
+            }
+
+            if(max_advance == -1 || max_advance == 0) {
+                cout << "Error in lexical Analysis" <<endl; 
+                exit(1);
+            }
+
+            int accepting_dfa = -1;
+            for(int j=0;j < dfas.size() ; j++){
+                if(max_num_chars_to_final[j] == max_advance){
+                    accepting_dfa = j;
+                    break;
+                }
+            }
+
+            string output = input.substr(current,max_advance);
+            symbol_table[accepting_dfa].push_back(output);
+            //string output(input[current],input[current+max_advance]);
+            cout << "< "<<token_class[accepting_dfa] <<" , "<<output<<" >" << endl;
+
+            current += max_advance;
+
+            /* -1 -> next is rejecting && present is not final
+             *  0 -> " && present is final
+             */
+        }
+#endif
+        cout<<"Symbol Table: "<<endl;
+        for(int i=0; i<symbol_table[id_class].size(); i++){
+            cout<<i<<" "<<symbol_table[id_class][i]<<endl;
+        }
     }
 
-    cout<<"Symbol Table: "<<endl;
-    for(int i=0; i<symbol_table[id_class].size(); i++){
-        cout<<i<<" "<<symbol_table[id_class][i]<<endl;
-    }
-    }
-    
     return 0;
 }
