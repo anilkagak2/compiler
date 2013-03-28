@@ -28,4 +28,8 @@ class Grammar {
 	private:
 		map<string, NonTerminal> nonTerminals;
 		set<string>		 terminals;
+		void populateFirst();
+		void populateFollow();
+		void makeParse();
 };
+
