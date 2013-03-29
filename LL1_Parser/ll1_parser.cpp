@@ -50,11 +50,11 @@ Grammar::populateFollow () {
 
 	nonTerminals[start].followSet.insert (dollar);
 
-	map<string, NonTerminal> it;
+	map<string, NonTerminal>::iterator it;
 	while (1) {
 	bool change = false;
 	for (it=nonTerminals.begin (); it!=nonTerminals.end (); it++) {
-		vector<string> P = it->second->productions;
+		vector<string> P = it->second.productions;
 		for (int i=0; i<P.size (); i++) {
 			stringstream ss (P[i]);
 			string nt, reverse_pi;
@@ -65,8 +65,13 @@ Grammar::populateFollow () {
 				reverse_pi += nt + " ";
 				if (isNonTerminal (nt)) {
 					set<string> f_next = firstOf (ss.str ());
-					bool inserted = NonTerminal[nt].followSet.insert (f_next.begin (), f_next.end ()).second;
-					change |= inserted;
+					set<string> &follow = nonTerminals[nt].followSet;
+					bool subset = includes (follow.begin (), follow.end (),
+								f_next.begin (), f_next.end ());
+					if (!subset) {
+						follow.insert (f_next.begin (), f_next.end ());
+						change |= subset;
+					}
 				}
 			}
 		
@@ -75,9 +80,14 @@ Grammar::populateFollow () {
 			ss.str (reverse_pi);
 			while (ss >> nt) {
 				if (isNonTerminal (nt) && nullable (ss.str ())) {
-					set<string> followPI = it->followSet;	// follow set of the current NT
-					bool inserted = NonTerminal[nt].followSet.insert (followPI.begin (), followPI.end ()).second;
-					change |= inserted;
+					set<string> followPI = it->second.followSet;	// follow set of the current NT
+					set<string> &follow = nonTerminals[nt].followSet;
+					bool subset = includes (follow.begin (), follow.end (),
+								followPI.begin (), followPI.end ());
+					if (!subset) {
+						follow.insert (followPI.begin (), followPI.end ());
+						change |= subset;
+					}
 				}
 			}
 		}
@@ -104,7 +114,7 @@ Grammar::nullable (string P) {
 /* Calculates the First set of a production.
  * Recursion shouldn't be the bottolneck
  */
-set<string> &
+set<string> 
 Grammar::firstOf (string production) {
 	stringstream ss (production);
 	string nt;
@@ -112,25 +122,23 @@ Grammar::firstOf (string production) {
 
 	ss >> nt;
 	if (nt != "") {
-		if (isTerminal (nt)) {
-			first.insert (nt);
-			break;
+		if (isTerminal (nt)) first.insert (nt);
+		else {
+			bool isNt = isNonTerminal (nt);
+			if (!isNt) {
+				cout << "Error firstOf: Symbol not in the grammar"
+					<< endl;
+				exit (EXIT_FAILURE);
+			}
+
+			if (isNt && !nonTerminals[nt].nullable)
+				return nonTerminals[nt].firstSet;
+
+			first.insert (nonTerminals[nt].firstSet.begin (),
+					nonTerminals[nt].firstSet.end ());
+			set<string> f_next = firstOf (ss.str ());
+			first.insert ( f_next.begin (), f_next.end ());
 		}
-
-		bool isNt = isNonTerminal (nt);
-		if (!isNt) {
-			cout << "Error firstOf: Symbol not in the grammar"
-				<< endl;
-			exit (EXIT_FAILURE);
-		}
-
-		if (isNt && !nonTerminals[nt].nullable)
-			return nonTerminals[nt].firstSet;
-
-		first.insert (nonTerminals[nt].firstSet.begin (),
-				nonTerminals[nt].firstSet.end ());
-		set<string> f_next = firstOf (ss.str ());
-		first.insert ( f_next.begin (), f_next.end ());
 	}
 
 	return first;
@@ -138,125 +146,122 @@ Grammar::firstOf (string production) {
 
 //Tokenised, space separated input is assumed
 //eg: Id plus whitespace etc
-void Grammer::parse(string input){
-    queue<string> q = splitstr_queue(input);
-    stack<string> s;
+void Grammar::parse(string input){
+	queue<string> q = splitstr_queue(input);
+	stack<string> s;
 
-    q.push(dollar);
-    s.push(dollar);
+	q.push(dollar);
+	s.push(dollar);
 
-    while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
-       if(s.top() == q.front()){
-            s.pop();
-            q.pop();
-       } 
-       else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
-                string prod = nonTerminals[s.top].parseTable[q.front()];
-                stack<string> stk = splitstr_stack(prod);
-                
-                s.pop();
-                if(stk.top() != "EPS"){ // if prod is epsilon, then just pop
-                    while(!stk.empty()){
-                        s.push(stk.top());
-                        stk.pop();
-                    }
-                }
-       }
-       else{ // error
-            printf("Error occured in parsing input file: %s\n",q.front())
-            return;
-       }
-    }
+	while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
+		if(s.top() == q.front()){
+			s.pop();
+			q.pop();
+		} 
+		else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
+			string prod = nonTerminals[s.top ()].parseTable[q.front()];
+			stack<string> stk = splitstr_stack(prod);
+
+			s.pop();
+			if(stk.top() != "EPS"){ // if prod is epsilon, then just pop
+				while(!stk.empty()){
+					s.push(stk.top());
+					stk.pop();
+				}
+			}
+		}
+		else{ // error
+			printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
+			return;
+		}
+	}
 }
 
-void Grammer::makeParse(){
-   
-    //set<string> first = firstOf();
-    map<string,NonTerminal>::iterator it;
-    for(it=NonTerminals.begin(); it != nonTerminals.end() ; it++){
-        NonTerminal tmp = it->second;
-           //single nontreminal
-        for(int i=0;i<tmp.productions.size();i++){
-            string prod = tmp.productions[i];
-            set<string> first = firstOf(prod);
-            set<string>::iterator it_set;
-            bool eps_in = false;
-            for(it_set = first.begin(); it_set != first.end() ; it_set++){
-                string terminal = *it_set;
-                
-                //if epsilon
-                if(s == "EPS"){
-                    eps_in = true;
-                }
+void Grammar::makeParse(){
+	//set<string> first = firstOf();
+	map<string,NonTerminal>::iterator it;
+	for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
+		NonTerminal tmp = it->second;
+		//single nontreminal
+		for(int i=0;i<tmp.productions.size();i++){
+			string prod = tmp.productions[i];
+			set<string> first = firstOf(prod);
+			set<string>::iterator it_set;
+			bool eps_in = false;
+			for(it_set = first.begin(); it_set != first.end() ; it_set++){
+				string terminal = *it_set;
 
-                map[terminal] = prod
-            }
+				//if epsilon
+				if(terminal == "EPS"){
+					eps_in = true;
+				}
 
-            if(eps_in){ // also calculate from follow set
-                set<string> follow = tmp.followSet;
-                for(it_set = follow.begin(); it_set != follow.end() ; it_set++){
-                    //string terminal = *it_set;   
-                    map[*it_set] = prod
-                }
-            }
-        }
+				tmp.parseTable[terminal] = prod;
+			}
 
-    }
+			if(eps_in){ // also calculate from follow set
+				set<string> follow = tmp.followSet;
+				for(it_set = follow.begin(); it_set != follow.end() ; it_set++){
+					//string terminal = *it_set;   
+					tmp.parseTable[*it_set] = prod;
+				}
+			}
+		}
+
+	}
 }
 
-void Grammer::calcNullable(){
+void Grammar::calcNullable(){
+	bool change = false;
+	while(1){
+		if(change){
+			change = false;
+		}
+		else break;
 
-    bool change = false;
-    while(1){
-        if(change){
-            change = false;
-        }
-        else break;
+		map<string,NonTerminal>::iterator it;
+		for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
+			NonTerminal tmp = it->second;
+			if(tmp.nullable)
+				continue;
 
-        map<string,NonTerminal>::iterator it;
-        for(it=NonTerminals.begin(); it != nonTerminals.end() ; it++){
-            NonTerminal tmp = it->second;
-            if(tmp.nullable)
-                continue;
+			bool non_terminal_nullable = false;
 
-            bool non_terminal_nullable = false;
+			//single nontreminal
+			for(int i=0;i<tmp.productions.size();i++){
+				vector<string> v = splitstr(tmp.productions[i]);
+				bool all_nullable = true;
 
-            //single nontreminal
-            for(int i=0;i<tmp.productions.size();i++){
-                vector<string> v = splitstr(tmp.productions[i]);
-                bool all_nullable = true;
+				//single production, if any one of the production is all_nullable, the nonTerminal is nullable
+				for(int j=0;j<v.size();j++){
+					if(nonTerminals.find(v[j])!=nonTerminals.end()){
+						if(!nonTerminals[v[j]].nullable){
+							all_nullable = false;
+							break;
+						}
+					} 
+					else{
+						all_nullable = false;
+						break;
+					}
+				}
 
-                //single production, if any one of the production is all_nullable, the nonTerminal is nullable
-                for(int j=0;j<v.size();j++){
-                    if(nonTerminals.find(v[j])!=nonTerminals.end()){
-                        if(!nonTerminals[v[j]].nullable){
-                            all_nullable = false;
-                            break;
-                        }
-                    } 
-                    else{
-                        all_nullable = false;
-                        break;
-                    }
-                }
+				if(all_nullable){
+					non_terminal_nullable = true;
+					break;
+				}
+			}
 
-                if(all_nullable){
-                    non_terminal_nullable = true;
-                    break;
-                }
-            }
+			if(non_terminal_nullable){
+				tmp.nullable = true;
+				change = true;
+			}
 
-            if(non_terminal_nullable){
-                tmp.nullable = true;
-                change = true;
-            }
-
-        }
-    }
+		}
+	}
 }
 
-void Grammar(char * fileName){
-	
+Grammar::Grammar(char * fileName){
 	string data;
 	ifstream file(fileName,ifstream::in);
 	if(!file.is_open()){
@@ -276,17 +281,17 @@ void Grammar(char * fileName){
 			/*
 			   %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 			   %start translation_unit
-			*/
+			 */
 
 			if(all_token[0] == "%token"){
 				if(all_token.size() > 1)
-				terminals.insert(all_token.begin()+1,all_token.end());
+					terminals.insert(all_token.begin()+1,all_token.end());
 			}
 			else if(all_token[0] == "%start"){
 				if(all_token.size() > 1)
 					start = all_token[1];
 			}
-//			cout << data << endl;
+			//			cout << data << endl;
 		}
 		getline(file,data);
 	}
@@ -303,7 +308,7 @@ void Grammar(char * fileName){
 
 				if(data[0] != '\t'){
 					nonTerminalName = data;
-					
+
 					//If non terminal in not in map
 					if(isNonTerminal(nonTerminalName)){
 						nt = nonTerminals[nonTerminalName];
@@ -315,8 +320,8 @@ void Grammar(char * fileName){
 					// Rules are of the form
 					// \t: primary_expression
 					data = data.substr(3);
-					nt.production.push_back(data);
-					
+					nt.productions.push_back(data);
+
 					if(data == "EPS")
 						nt.nullable = true;
 

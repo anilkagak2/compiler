@@ -1,16 +1,22 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
+#include <set>
+#include <stack>
+#include <queue>
+#include <algorithm>
+#include <sstream>
 #include <string>
 #include <cstdlib>
+#include <cstdio>
 
 using namespace std;
 
 /* Class representing the abstract notion of NonTerminals */
 class NonTerminal {
 	public:
-		NonTerminal (string p);
-		~ NonTerminal ();
+		NonTerminal ();
 		void addProductions (string p);
 
 		bool nullable;
@@ -35,6 +41,7 @@ class Grammar {
 		void populateFirst();
 		void populateFollow();
 		void makeParse();
+		void parse(string);
 
 		/* Follow: Helper functions. */
 		inline bool isNonTerminal (string nt) {
@@ -46,7 +53,7 @@ class Grammar {
 		}
 
 		/* Calculates the First set of a production. */
-		set<string> &firstOf (string production);
+		set<string> firstOf (string production);
 
 		/* Calculates the Nullability of a production. */
 		bool nullable (string production);
