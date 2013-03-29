@@ -17,6 +17,28 @@ vector <string> splitstr(string message){
     return str;
 }
 
+queue <string> splitstr_queue(string message){
+    stringstream ss(message);
+    string s;
+    queue <string> str;
+    while(ss>>s){
+        //cout<<s<<endl;
+        str.push(s);
+    }
+    return str;
+}
+
+stack <string> splitstr_stack(string message){
+    stringstream ss(message);
+    string s;
+    stack <string> str;
+    while(ss>>s){
+        //cout<<s<<endl;
+        str.push(s);
+    }
+    return str;
+}
+
 /* Calculate the follow sets of the NonTerminals */
 void
 Grammar::populateFollow () {
@@ -113,6 +135,39 @@ Grammar::firstOf (string production) {
 	}
 
 	return first;
+}
+
+//Tokenised, space separated input is assumed
+//eg: Id plus whitespace etc
+void Grammer::parse(string input){
+    queue<string> q = splitstr_queue(input);
+    stack<string> s;
+
+    q.push(dollar);
+    s.push(dollar);
+
+    while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
+       if(s.top() == q.front()){
+            s.pop();
+            q.pop();
+       } 
+       else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
+                string prod = nonTerminals[s.top].parseTable[q.front()];
+                stack<string> stk = splitstr_stack(prod);
+                
+                s.pop();
+                if(stk.top() != "EPS"){ // if prod is epsilon, then just pop
+                    while(!stk.empty()){
+                        s.push(stk.top());
+                        stk.pop();
+                    }
+                }
+       }
+       else{ // error
+            printf("Error occured in parsing input file: %s\n",q.front())
+            return;
+       }
+    }
 }
 
 void Grammer::makeParse(){
