@@ -14,6 +14,8 @@ nfa::nfa (string regex) {
     transitions[0].resize (MAX_ALPHABET);
     transitions[1].resize (MAX_ALPHABET);
 
+    // here just * will also work as if * is a char
+    // although \* works too in the same way
     // base regular expression
     if (regex.length () == 1) {
         alphabet.insert (regex[0]);
@@ -50,6 +52,9 @@ nfa::print_transitions () {
 
 /*
  * Not allowing escapped sequence in range operator []
+ * only simple range operators like [0-9] or [a-z] are supported right now
+ * allowing any other functionality like [a-zA-Z] can be done very easily by
+ * extending this function.
  */
 string
 nfa::complex_to_base (string r) {

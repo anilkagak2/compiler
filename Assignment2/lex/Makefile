@@ -1,5 +1,13 @@
+all: lex lexMM
+
 lex: dfa.o nfa.o main.o
 	g++ main.o dfa.o nfa.o -o lex
+
+lexMM: dfa.o nfa.o mainMM.o
+	g++ mainMM.o dfa.o nfa.o -o lexMM
+
+mainMM.o: declarations.h main.cpp
+	g++ -g -c -o mainMM.o main.cpp -D_MAXIMAL_MATCH_
 
 main.o: declarations.h main.cpp
 	g++ -g -c -o main.o main.cpp

@@ -60,7 +60,7 @@ class dfa {
     dfa (int num_states,set<char> alphabet,vector<vector<int> > transitions,vector<bool> final);
 	void print_transitions();    
 	void print_final();  
-   
+    bool match(string s);   
     void print_rejecting();
     void calculate_reject();
     void reset();
