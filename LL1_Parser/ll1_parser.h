@@ -31,6 +31,11 @@ class NonTerminal {
 class Grammar {
 	public:
 		Grammar(char* fileName);
+		void printNonTerminals();
+		void printTerminals();
+		void printFirstSet();
+		void printFollowSet();
+		void printParseTable();
 
 	private:
 		map<string, NonTerminal> nonTerminals;
@@ -57,12 +62,14 @@ class Grammar {
 		   If str is a Terminal then adds it to the first set
 		   Returns true is there has been change in the first set
 		 */ 
-		bool addFirst(NonTerminal nt,string str);
+		bool addFirst(NonTerminal &nt,string str);
 
 		/* Calculates the First set of a production. */
 		set<string> firstOf (string production);
 
 		/* Calculates the Nullability of a production. */
 		bool nullable (string production);
+
+		
 };
 
