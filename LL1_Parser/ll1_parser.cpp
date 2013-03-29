@@ -364,10 +364,10 @@ void Grammar::populateFirst(){
 		cout << "In populateFirst"<< endl;
 		isChanged = false;
 		for (it=nonTerminals.begin(); it!=nonTerminals.end(); ++it){
-			NonTerminal nt = it->seecond;
+			NonTerminal nt = it->second;
 			//For each production
 			for(vit=nt.productions.begin();vit!=nt.productions.end();vit++){
-				vector<string> alphabet = splitstr(nt.second);
+				vector<string> alphabet = splitstr(*vit);
 				if(addFirst(nt,alphabet[0]))
 					isChanged = true;
 
@@ -394,9 +394,11 @@ void Grammar::populateFirst(){
 bool
 Grammar::addFirst(NonTerminal nt,string str){
 	if(isNonTerminal(str)){
-		if(includes(nt.firstSet.begin(),nt.firstSet.end();map[str].firstSet.begin(),map[str].firstSet.end()))
+		if( includes (nt.firstSet.begin (), nt.firstSet.end (), 
+				nonTerminals[str].firstSet.begin (), nonTerminals[str].firstSet.end () ) )
 			return false;
-		nt.firstSet.insert(map[str].firstSet);
+		set<string> first = nonTerminals[str].firstSet;
+		nt.firstSet.insert(first.begin (), first.end ());
 	}
 	else if (isTerminal(str)){
 		if(nt.firstSet.find(str) != nt.firstSet.end())

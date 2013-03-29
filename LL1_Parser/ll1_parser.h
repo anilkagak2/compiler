@@ -16,7 +16,6 @@ using namespace std;
 /* Class representing the abstract notion of NonTerminals */
 class NonTerminal {
 	public:
-		NonTerminal ();
 		void addProductions (string p);
 
 		bool nullable;
