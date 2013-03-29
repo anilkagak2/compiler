@@ -13,7 +13,7 @@ class NonTerminal {
 		~ NonTerminal ();
 		void addProductions (string p);
 
-
+		bool nullable;
 		set<string> 		firstSet;
 		set<string> 		followSet;
 		map<string, string>	parseTable;
@@ -25,11 +25,11 @@ class NonTerminal {
  */
 class Grammar {
 	public:
-		Grammar ();
 
 	private:
 		map<string, NonTerminal> nonTerminals;
 		set<string>		 terminals;
+		void calcNullable();
 		string 			 start;
 		void populateFirst();
 		void populateFollow();
