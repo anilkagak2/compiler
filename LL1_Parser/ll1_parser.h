@@ -45,6 +45,14 @@ class Grammar {
 			return terminals.find (nt) != terminals.end ();
 		}
 
+
+		/*
+		   If str is a nonTerminal then adds FIRST[str] to that of nt
+		   If str is a Terminal then adds it to the first set
+		   Returns true is there has been change in the first set
+		 */ 
+		bool addFirst(NonTerminal nt,string str);
+
 		/* Calculates the First set of a production. */
 		set<string> &firstOf (string production);
 

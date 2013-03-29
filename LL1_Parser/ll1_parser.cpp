@@ -4,6 +4,7 @@ using namespace std;
 
 /* $ symbol */
 const string dollar="DOLLAR";
+const string EPSILON="EPS";
 
 vector <string> splitstr(string message){
     stringstream ss(message);
@@ -69,7 +70,7 @@ Grammar::populateFollow () {
 /* Calculates the Nullability of a production. */
 bool 
 Grammar::nullable (string P) {
-	if (P == "") return true;
+	if (P == "" || P == EPSILON) return true;
 
 	stringstream ss (P);
 	string nt;
@@ -130,7 +131,7 @@ void Grammer::makeParse(){
                 string terminal = *it_set;
                 
                 //if epsilon
-                if(s == "EPS"){
+                if(s == EPSILON){
                     eps_in = true;
                 }
 
@@ -261,8 +262,8 @@ void Grammar(char * fileName){
 					// \t: primary_expression
 					data = data.substr(3);
 					nt.production.push_back(data);
-					
-					if(data == "EPS")
+
+					if(data == EPSILON)
 						nt.nullable = true;
 
 					cout <<"Rules :" << data << endl;
@@ -278,3 +279,72 @@ void Grammar(char * fileName){
 
 }
 
+/*
+Algorithm
+
+For each terminal t
+	First(t) = { t }
+For each non-terminal N
+	First(N) = { } 
+Repeat
+	For each production N ::= x1x2x3…xn
+		First(N) = First(N) ∪ First(x1)
+		For each i from 2 through n
+			If Nullable(x1…xi-1), then
+				First(N) = First(N) ∪ First(xi)
+Until no First set changes
+
+*/
+
+void Grammar::populateFirst(){
+	map<string, NonTerminal>::iterator it;
+	vector<string>::iterator vit;
+	bool isChanged = true;
+	while(isChanged){
+		cout << "In populateFirst"<< endl;
+		isChanged = false;
+		for (it=nonTerminals.begin(); it!=nonTerminals.end(); ++it){
+			NonTerminal nt = it->seecond;
+			//For each production
+			for(vit=nt.productions.begin();vit!=nt.productions.end();vit++){
+				vector<string> alphabet = splitstr(nt.second);
+				if(addFirst(nt,alphabet[0]))
+					isChanged = true;
+
+				for(int i=1;i<alphabet.size();i++){
+					string sub_prod = "";
+					for(int j=0;j<i;j++)
+						sub_prod += alphabet[j];
+					if(nullable(sub_prod)){
+						if(addFirst(nt,alphabet[i]))
+							isChanged = true;
+					}
+				}
+			}
+
+		}
+	}
+}
+
+/*
+   If str is a nonTerminal then adds FIRST[str] to that of nt
+   If str is a Terminal then adds it to the first set
+   Returns true is there has been change in the first set
+ */ 
+bool
+Grammar::addFirst(NonTerminal nt,string str){
+	if(isNonTerminal(str)){
+		if(includes(nt.firstSet.begin(),nt.firstSet.end();map[str].firstSet.begin(),map[str].firstSet.end()))
+			return false;
+		nt.firstSet.insert(map[str].firstSet);
+	}
+	else if (isTerminal(str)){
+		if(nt.firstSet.find(str) != nt.firstSet.end())
+			return false;
+		nt.firstSet.insert(str);
+	}else{
+		cout << "Cannot identify the string : "<<str<<endl;
+		exit(EXIT_FAILURE);	
+	}
+	return true;
+}
