@@ -1,0 +1,57 @@
+<Keyword, int>
+<Whitespace,  >
+<Identifier, a>
+<Whitespace,  >
+<Operator, =>
+<Whitespace,  >
+<Integer, 5>
+<Whitespace,  >
+<Special Symbol, ;>
+<Whitespace, 
+>
+<Keyword, for>
+<Whitespace,  >
+<Special Symbol, (>
+<Keyword, int>
+<Whitespace,  >
+<Identifier, i>
+<Operator, =>
+<Integer, 0>
+<Special Symbol, ;>
+<Whitespace,  >
+<Identifier, i>
+<Operator, <>
+<Identifier, n>
+<Special Symbol, ;>
+<Whitespace,  >
+<Identifier, i>
+<Operator, +>
+<Operator, +>
+<Special Symbol, )>
+<Whitespace,  >
+<Special Symbol, {>
+<Whitespace, 
+>
+<Whitespace, 	>
+<Keyword, if>
+<Whitespace,  >
+<Special Symbol, (>
+<Identifier, i>
+<Whitespace,  >
+<Operator, ==>
+<Identifier, n>
+<Whitespace,  >
+<Special Symbol, )>
+<Whitespace,  >
+<Identifier, a>
+<Whitespace,  >
+<Operator, +>
+<Operator, =>
+<Whitespace,  >
+<Identifier, i>
+<Special Symbol, ;>
+<Whitespace, 
+>
+<Special Symbol, }>
+<Whitespace, 
+>
