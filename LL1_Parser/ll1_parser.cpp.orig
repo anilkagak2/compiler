@@ -18,6 +18,9 @@ vector<string> splitstr(string message){
 }
 
 
+
+<<<<<<< HEAD
+=======
 /* Class representing the abstract notion of NonTerminals */
 class NonTerminal {
     public:
@@ -84,6 +87,7 @@ void Grammer::makeParse(){
     }
 }
 
+>>>>>>> 239331138304c2525d80b0b0b0ebf4410d398069
 void Grammer::calcNullable(){
 
     bool change = false;
