@@ -16,6 +16,7 @@ vector <string> splitstr(string message){
     return str;
 }
 
+<<<<<<< HEAD
 queue <string> splitstr_queue(string message){
     stringstream ss(message);
     string s;
@@ -38,6 +39,7 @@ stack <string> splitstr_stack(string message){
     return str;
 }
 
+=======
 /* Calculate the follow sets of the NonTerminals */
 void
 Grammar::populateFollow () {
@@ -49,6 +51,7 @@ Grammar::populateFollow () {
 	}
 
 	nonTerminals[start].followSet.insert (dollar);
+>>>>>>> a20ede7467773277da3d491e716bcb505723f1c3
 
 	map<string, NonTerminal> it;
 	while (1) {
@@ -127,15 +130,7 @@ Grammar::firstOf (string production) {
 		if (isNt && !nonTerminals[nt].nullable)
 			return nonTerminals[nt].firstSet;
 
-		first.insert (nonTerminals[nt].firstSet.begin (),
-				nonTerminals[nt].firstSet.end ());
-		set<string> f_next = firstOf (ss.str ());
-		first.insert ( f_next.begin (), f_next.end ());
-	}
-
-	return first;
-}
-
+<<<<<<< HEAD
 //Tokenised, space separated input is assumed
 //eg: Id plus whitespace etc
 void Grammer::parse(string input){
@@ -167,6 +162,15 @@ void Grammer::parse(string input){
             return;
        }
     }
+=======
+		first.insert (nonTerminals[nt].firstSet.begin (),
+				nonTerminals[nt].firstSet.end ());
+		set<string> f_next = firstOf (ss.str ());
+		first.insert ( f_next.begin (), f_next.end ());
+	}
+
+	return first;
+>>>>>>> a20ede7467773277da3d491e716bcb505723f1c3
 }
 
 void Grammer::makeParse(){
