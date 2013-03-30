@@ -164,7 +164,7 @@ void Grammar::parse(string input){
 			stack<string> stk = splitstr_stack(prod);
 
 			s.pop();
-			if(stk.top() != "EPS"){ // if prod is epsilon, then just pop
+			if(stk.top() != EPSILON){ // if prod is epsilon, then just pop
 				while(!stk.empty()){
 					s.push(stk.top());
 					stk.pop();

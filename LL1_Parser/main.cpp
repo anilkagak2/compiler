@@ -15,4 +15,9 @@ int main () {
 	g.printFollowSet();
 	g.printParseTable();
 	return 0;
+
+    //ifstream input("lex_output.txt");
+    string input = get_file_contents("lex_output.txt");
+    g.parse(input);
+
 };
