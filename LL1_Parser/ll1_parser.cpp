@@ -182,16 +182,17 @@ void Grammar::makeParse(){
 	//set<string> first = firstOf();
 	map<string,NonTerminal>::iterator it;
 	for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
-		NonTerminal tmp = it->second;
-		//single nontreminal
+		NonTerminal &tmp = it->second;
+        //single nontreminal
 		for(int i=0;i<tmp.productions.size();i++){
 			string prod = tmp.productions[i];
+            //cout << "parse table: prod:  "<<prod <<endl;
 			set<string> first = firstOf(prod);
 			set<string>::iterator it_set;
 			bool eps_in = false;
 			for(it_set = first.begin(); it_set != first.end() ; it_set++){
 				string terminal = *it_set;
-
+                //cout << "parse table: terminal:  "<<terminal <<endl;
 				//if epsilon
 				if(terminal == EPSILON){
 					eps_in = true;
