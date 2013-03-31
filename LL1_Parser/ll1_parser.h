@@ -56,6 +56,12 @@ class Grammar {
 			return terminals.find (nt) != terminals.end ();
 		}
 
+		/* number to string */
+		inline string numToString (int i) {
+			stringstream ss;
+			ss << i;
+			return ss.str ();
+		}
 
 		/*
 		   If str is a nonTerminal then adds FIRST[str] to that of nt
@@ -70,6 +76,18 @@ class Grammar {
 		/* Calculates the Nullability of a production. */
 		bool nullable (string production);
 
-		
+		/* Remove indirect left recursion. */
+		void removeIndirectLeftRecursion ();
+
+		/* Remove direct left recursion. */
+		void removeDirectLeftRecursion (string nt, vector<string> &);
+
+		/* Generate name for the new NonTerminal. */
+		string generateName (string nt);
+};
+
+
+		/* Generate name for the new NonTerminal. */
+		string generateName (string nt);
 };
 

@@ -39,6 +39,93 @@ stack <string> splitstr_stack(string message){
     return str;
 }
 
+/* Generate name for the new NonTerminal. */
+string generateName (string nt) {
+	static int number = 0;
+	string newName = "__"+nt+numToString (number)+"__";
+	return newName;
+}
+
+/* Remove direct left recursion. */
+void
+Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
+	vecto<bool> left_club(p.size (), false);
+	set<string> to_add;
+
+	// which are to be clubbed for the new NonTerminal
+	// START DEALING WITH OLD NONTERMINAL
+	for (int i=0; i<p.size (); i++) 
+		if (p[i].find_first_of (nt) == 0) {
+			left_club[i] = true;
+			string left_p = p[i].substr (nt.length ());
+			left_p = trim (left_p);
+			set.insert (left_p);
+		}
+
+	// bA' type
+	for (int i=0; i<p.size (); i++) 
+		if (!left_club[i]) p[i] += " " + newnt;
+
+	set<string> new_rules (p.begin (), p.end ());
+	set<string> old_rules;
+	for (int i=0; i<p.size (); i++) 
+		if (left_club[i]) old_rules.insert (p[i]);
+
+	new_rules.erase (old_rules.begin (), old_rules.end ());
+	// END DEALING WITH OLD NONTERMINAL
+
+	// ADD NEW NONTERMINAL
+	// Add new productions in a new NonTerminal
+	string newnt = generateName (nt);
+	NonTerminal NT;
+	set<string>::iterator it;
+	for (it=to_add.begin (); it != to_add.end (); it++)
+		NT.productions.push_back (*it+ " " + newnt);
+
+	NT.productions.push_back (EPSILON);
+	NT.nullable = true;
+
+	nonTerminals[newnt] = NT;
+}
+
+/* Remove indirect left recursion. */
+void
+Grammar::removeIndirectLeftRecursion () {
+	// for 1 to n
+	map<string, NonTerminal>::iterator out, iit;
+	cout << "Removing indirect left recusion " << endl;
+	for (out=nonTerminals.begin (); out!=nonTerminals.end (); out++) {
+		cout << "NT " << out->first << endl;
+		vector<string> &productions = out->second.productions;
+		for (iit=nonTerminals.begin (); iit!=oit; iit++) {
+			cout << "\t searching for " << iit->first << endl;
+			vector<string> to_add;
+			for (int i=0; i<productions.size (); i++) {
+				cout << "in production " << productions[i] << endl;
+				string nt = iit->first;
+				int pos = productions[i].find_first_of (nt);
+				if (pos == 0) {
+					cout << "it in production " << productions[i] << endl;
+					string left_token = productions[i].substr (nt.length ());
+					vector<string> &from = iit->second.productions;
+					// replace the ith by the 1st rule here & place the remaining at the end instead of erasing this element
+					if (from.size () > 0)
+						productions[i] = from[0] + " " + left_token;
+
+					for (int i=1; i<from.size (); i++)
+						to_add.push_back (from[i]+" "+left_token);
+
+					// add these rules to the productions & remove the
+					// current one
+				}
+			}
+			productions.push_back (productions.begin (), to_add.begin (), to_add.end ());
+		}
+		// Remove direct recursion for each production in the vector
+		removeDirectLeftRecursion (out->first, productions);
+	}
+}
+
 /* Calculate the follow sets of the NonTerminals */
 void
 Grammar::populateFollow () {
@@ -65,7 +152,12 @@ Grammar::populateFollow () {
 			while (ss >> nt) {
 				reverse_pi += nt + " ";
 				if (isNonTerminal (nt)) {
-					set<string> f_next = firstOf (ss.str ());
+					// TODO NEW CODE TO BE TESTED
+					string next = ss.str ().substr (reverse_pi.length ());
+					next = trim (next);
+					set<string> f_next = firstOf (next);
+					// TODO
+
 					set<string> &follow = nonTerminals[nt].followSet;
 					bool subset = includes (follow.begin (), follow.end (),
 								f_next.begin (), f_next.end ());
@@ -79,8 +171,15 @@ Grammar::populateFollow () {
 			// TODO delete the last space	
 			// n to 1
 			ss.str (reverse_pi);
+			reverse_pi = "";
 			while (ss >> nt) {
-				if (isNonTerminal (nt) && nullable (ss.str ())) {
+				// TODO NEW CODE TO BE TESTED
+				reverse_pi += nt + " ";
+				string next = ss.str ().substr (reverse_pi.length ());
+				next = trim (next);
+				// TODO
+
+				if (isNonTerminal (nt) && nullable (next)) {
 					set<string> followPI = it->second.followSet;	// follow set of the current NT
 					set<string> &follow = nonTerminals[nt].followSet;
 					bool subset = includes (follow.begin (), follow.end (),
@@ -108,8 +207,15 @@ Grammar::nullable (string P) {
 	string nt;
 	ss >> nt;
 	// TODO check for trailing whitespaces in the ss stream
-	if (isNonTerminal (nt) && !nonTerminals[nt].nullable) return false;
-	else return nullable (ss.str ());
+	if (isTerminal (nt)) return false;
+	else if (isNonTerminal (nt) && !nonTerminals[nt].nullable) return false;
+	else {
+		// TODO NEW CODE TO BE TESTED
+		string to_check = ss.str ().substr (nt.length ());
+		to_check = trim (to_check);
+		return nullable (to_check);
+		// TODO
+	}
 }
 
 /* Calculates the First set of a production.
@@ -137,7 +243,13 @@ Grammar::firstOf (string production) {
 
 			first.insert (nonTerminals[nt].firstSet.begin (),
 					nonTerminals[nt].firstSet.end ());
-			set<string> f_next = firstOf (ss.str ());
+
+			// TODO NEW CODE TO BE TESTED
+			string to_check = ss.str ().substr (nt.length ());
+			trim (to_check);
+			set<string> f_next = firstOf (to_check);
+			// TODO
+
 			first.insert ( f_next.begin (), f_next.end ());
 		}
 	}
