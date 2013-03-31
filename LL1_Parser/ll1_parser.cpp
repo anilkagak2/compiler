@@ -450,6 +450,7 @@ Grammar::Grammar(string fileName){
 		while(!file.eof() ){
 				getline(file,data);
 				NonTerminal nt;
+				nt.nullable = false;
 				string nonTerminalName = "";
 
 				while(!file.eof() && data != "\t;"){
@@ -480,6 +481,7 @@ Grammar::Grammar(string fileName){
 		}
 
         printTerminals();
+		calcNullable();
 		populateFirst();
 		populateFollow();
 		makeParse();
@@ -520,9 +522,13 @@ void Grammar::populateFirst(){
 
 								for(int i=1;i<alphabet.size();i++){
 										string sub_prod = "";
-										for(int j=0;j<i;j++)
-												sub_prod += alphabet[j];
+										for(int j=0;j<i;j++){
+											sub_prod += alphabet[j];
+											sub_prod += ' ';	
+										}
+										//cout <<" sub_prod : " <<sub_prod <<endl;
 										if(nullable(sub_prod)){
+											//cout << "Nullable : " <<sub_prod << endl;
 												if(addFirst(nt,alphabet[i]))
 														isChanged = true;
 										}
