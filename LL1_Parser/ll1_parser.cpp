@@ -7,15 +7,30 @@ const string dollar="DOLLAR";
 const string EPSILON="EPS";
 
 vector <string> splitstr(string message){
-    stringstream ss(message);
-    string s;
-    vector <string> str;
-    while(ss>>s){
-        //cout<<s<<endl;
-        str.push_back(s);
-    }
-    return str;
+		stringstream ss(message);
+		string s;
+		vector <string> str;
+		while(ss>>s){
+				//cout<<s<<endl;
+				str.push_back(s);
+		}
+		return str;
 }
+
+//trimming
+std::string trim(const std::string& str,
+				const std::string& whitespace = " \t\n")
+{
+		const auto int strBegin = str.find_first_not_of(whitespace);
+		if (strBegin == std::string::npos)
+				return ""; // no content
+
+		const auto int strEnd = str.find_last_not_of(whitespace);
+		const auto int strRange = strEnd - strBegin + 1;
+
+		return str.substr(strBegin, strRange);
+}
+
 
 queue <string> splitstr_queue(string message){
     stringstream ss(message);
@@ -326,179 +341,172 @@ void Grammar::makeParse(){
 }
 
 void Grammar::calcNullable(){
-	bool change = false;
-	while(1){
-		if(change){
-			change = false;
-		}
-		else break;
+		bool change = false;
+		while(1){
+				if(change){
+						change = false;
+				}
+				else break;
 
-		map<string,NonTerminal>::iterator it;
-		for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
-			NonTerminal tmp = it->second;
-			if(tmp.nullable)
-				continue;
+				map<string,NonTerminal>::iterator it;
+				for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
+						NonTerminal tmp = it->second;
+						if(tmp.nullable)
+								continue;
 
-			bool non_terminal_nullable = false;
+						bool non_terminal_nullable = false;
 
-			//single nontreminal
-			for(int i=0;i<tmp.productions.size();i++){
-				vector<string> v = splitstr(tmp.productions[i]);
-				bool all_nullable = true;
+						//single nontreminal
+						for(int i=0;i<tmp.productions.size();i++){
+								vector<string> v = splitstr(tmp.productions[i]);
+								bool all_nullable = true;
 
-				//single production, if any one of the production is all_nullable, the nonTerminal is nullable
-				for(int j=0;j<v.size();j++){
-					if(nonTerminals.find(v[j])!=nonTerminals.end()){
-						if(!nonTerminals[v[j]].nullable){
-							all_nullable = false;
-							break;
+								//single production, if any one of the production is all_nullable, the nonTerminal is nullable
+								for(int j=0;j<v.size();j++){
+										if(nonTerminals.find(v[j])!=nonTerminals.end()){
+												if(!nonTerminals[v[j]].nullable){
+														all_nullable = false;
+														break;
+												}
+										} 
+										else{
+												all_nullable = false;
+												break;
+										}
+								}
+
+								if(all_nullable){
+										non_terminal_nullable = true;
+										break;
+								}
 						}
-					} 
-					else{
-						all_nullable = false;
-						break;
-					}
+
+						if(non_terminal_nullable){
+								tmp.nullable = true;
+								change = true;
+						}
+
 				}
-
-				if(all_nullable){
-					non_terminal_nullable = true;
-					break;
-				}
-			}
-
-			if(non_terminal_nullable){
-				tmp.nullable = true;
-				change = true;
-			}
-
 		}
-	}
 }
 
 Grammar::Grammar(char * fileName){
-	string data;
-	ifstream file(fileName,ifstream::in);
-	if(!file.is_open()){
-		cout << "Error Opening file";
-		exit(EXIT_FAILURE);
-	}
-
-	getline(file,data);
-	while(!file.eof() && data != "%%"){
-		if(!file.eof() && data != "%%" && data != ""){
-			if(data[0] != '%'){
-				cout << "Error in Syntex of Grammar\n";
+		string data;
+		ifstream file(fileName,ifstream::in);
+		if(!file.is_open()){
+				cout << "Error Opening file";
 				exit(EXIT_FAILURE);
-			}
-
-			vector<string> all_token = splitstr(data);
-			/*
-			   %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
-			   %start translation_unit
-			 */
-
-			if(all_token[0] == "%token"){
-				if(all_token.size() > 1)
-					terminals.insert(all_token.begin()+1,all_token.end());
-			}
-			else if(all_token[0] == "%start"){
-				if(all_token.size() > 1)
-					start = all_token[1];
-			}
-			//			cout << data << endl;
 		}
+
 		getline(file,data);
-	}
-	while(!file.eof() ){
-		getline(file,data);
+		while(!file.eof() && data != "%%"){
+				if(!file.eof() && data != "%%" && data != ""){
+						if(data[0] != '%'){
+								cout << "Error in Syntex of Grammar\n";
+								exit(EXIT_FAILURE);
+						}
 
-		NonTerminal nt;
+						vector<string> all_token = splitstr(data);
+						/*
+						   %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+						   %start translation_unit
+						 */
 
-		string nonTerminalName = "";
-
-		while(!file.eof() && data != "\t;"){
-
-			if(!file.eof() && data != "\t;" && data != "") {
-
-				if(data[0] != '\t'){
-					nonTerminalName = data;
-
-					//If non terminal in not in map
-					if(isNonTerminal(nonTerminalName)){
-						nt = nonTerminals[nonTerminalName];
-					}
-//					cout <<"Token : "<< data<<endl ;
+						if(all_token[0] == "%token"){
+								if(all_token.size() > 1)
+										terminals.insert(all_token.begin()+1,all_token.end());
+						}
+						else if(all_token[0] == "%start"){
+								if(all_token.size() > 1)
+										start = all_token[1];
+						}
+						//			cout << " Terminals " << data << endl;
 				}
-
-				else{
-					// Rules are of the form
-					// \t: primary_expression
-					data = data.substr(3);
-					nt.productions.push_back(data);
-
-					if(data == EPSILON)
-						nt.nullable = true;
-
-//					cout <<"Rules :" << data << endl;
-				}
-			}
-			getline(file,data);
+				getline(file,data);
 		}
-		if(!file.eof())
-		nonTerminals[nonTerminalName] = nt;
-	}
+		while(!file.eof() ){
+				getline(file,data);
+				NonTerminal nt;
+				string nonTerminalName = "";
 
-populateFirst();
-populateFollow();
-makeParse();
+				while(!file.eof() && data != "\t;"){
+						if(!file.eof() && data != "\t;" && data != "") {
+								if(data[0] != '\t'){
+										nonTerminalName = trim(data);
+										//If non terminal in not in map
+										if(isNonTerminal(nonTerminalName)){
+												nt = nonTerminals[nonTerminalName];
+										}
+										//					cout <<"Token : "<< data<<endl ;
+								}
+								else{
+										// Rules are of the form
+										// \t: primary_expression
+										data = data.substr(3);
+										nt.productions.push_back(trim(data));
+										if(data == EPSILON)
+												nt.nullable = true;
+
+										//					cout <<"Rules :" << data << endl;
+								}
+						}
+						getline(file,data);
+				}
+				if(!file.eof())
+						nonTerminals[nonTerminalName] = nt;
+		}
+
+		populateFirst();
+		populateFollow();
+		makeParse();
 
 }
 
 /*
-Algorithm
+   Algorithm
 
-For each terminal t
-	First(t) = { t }
-For each non-terminal N
-	First(N) = { } 
-Repeat
-	For each production N ::= x1x2x3…xn
-		First(N) = First(N) ∪ First(x1)
-		For each i from 2 through n
-			If Nullable(x1…xi-1), then
-				First(N) = First(N) ∪ First(xi)
-Until no First set changes
+   For each terminal t
+   First(t) = { t }
+   For each non-terminal N
+   First(N) = { } 
+   Repeat
+   For each production N ::= x1x2x3…xn
+   First(N) = First(N) ∪ First(x1)
+   For each i from 2 through n
+   If Nullable(x1…xi-1), then
+   First(N) = First(N) ∪ First(xi)
+   Until no First set changes
 
-*/
+ */
 
 void Grammar::populateFirst(){
-	map<string, NonTerminal>::iterator it;
-	vector<string>::iterator vit;
-	bool isChanged = true;
-	while(isChanged){
-		cout << "In populateFirst"<< endl;
-		isChanged = false;
-		for (it=nonTerminals.begin(); it!=nonTerminals.end(); ++it){
-			NonTerminal &nt = it->second;
-			//For each production
-			for(vit=nt.productions.begin();vit!=nt.productions.end();vit++){
-				vector<string> alphabet = splitstr(*vit);
-				if(addFirst(nt,alphabet[0]))
-					isChanged = true;
+		map<string, NonTerminal>::iterator it;
+		vector<string>::iterator vit;
+		bool isChanged = true;
+		while(isChanged){
+				//cout << "In populateFirst"<< endl;
+				isChanged = false;
+				for (it=nonTerminals.begin(); it!=nonTerminals.end(); ++it){
+						NonTerminal &nt = it->second;
+						//For each production
+						for(vit=nt.productions.begin();vit!=nt.productions.end();vit++){
+								vector<string> alphabet = splitstr(*vit);
+								if(addFirst(nt,alphabet[0]))
+										isChanged = true;
 
-				for(int i=1;i<alphabet.size();i++){
-					string sub_prod = "";
-					for(int j=0;j<i;j++)
-						sub_prod += alphabet[j];
-					if(nullable(sub_prod)){
-						if(addFirst(nt,alphabet[i]))
-							isChanged = true;
-					}
+								for(int i=1;i<alphabet.size();i++){
+										string sub_prod = "";
+										for(int j=0;j<i;j++)
+												sub_prod += alphabet[j];
+										if(nullable(sub_prod)){
+												if(addFirst(nt,alphabet[i]))
+														isChanged = true;
+										}
+								}
+						}
+
 				}
-			}
-			
 		}
-	}
 }
 
 /*
@@ -508,84 +516,84 @@ void Grammar::populateFirst(){
  */ 
 bool
 Grammar::addFirst(NonTerminal &nt,string str){
-	if(isNonTerminal(str)){
-		if( includes (nt.firstSet.begin (), nt.firstSet.end (), 
-				nonTerminals[str].firstSet.begin (), nonTerminals[str].firstSet.end () ) )
-			return false;
-		set<string> first = nonTerminals[str].firstSet;
-		nt.firstSet.insert(first.begin (), first.end ());
-	}
-	else if (isTerminal(str)){
-		if(nt.firstSet.find(str) != nt.firstSet.end())
-			return false;
-		nt.firstSet.insert(str);
-	}else{
-		cout << "Cannot identify the string : "<<str<<endl;
-		exit(EXIT_FAILURE);	
-	}
-	return true;
+		if(isNonTerminal(str)){
+				if( includes (nt.firstSet.begin (), nt.firstSet.end (), 
+										nonTerminals[str].firstSet.begin (), nonTerminals[str].firstSet.end () ) )
+						return false;
+				set<string> first = nonTerminals[str].firstSet;
+				nt.firstSet.insert(first.begin (), first.end ());
+		}
+		else if (isTerminal(str)){
+				if(nt.firstSet.find(str) != nt.firstSet.end())
+						return false;
+				nt.firstSet.insert(str);
+		}else{
+				cout << "Cannot identify the string : "<<str<<endl;
+				exit(EXIT_FAILURE);	
+		}
+		return true;
 }
 
 void Grammar::printNonTerminals(){
-	map<string,NonTerminal>::iterator it;
-	cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
-	cout << "Non Terminals : ";
-	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-		cout << it->first << " " << endl;
-	}
+		map<string,NonTerminal>::iterator it;
+		//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
+		cout << "Non Terminals : ";
+		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+				cout << it->first << " " << endl;
+		}
 }
 
 void Grammar::printTerminals(){
-	set<string>::iterator it;
-	cout << "Terminals : ";
-	for ( it = terminals.begin() ; it != terminals.end() ; it++){
-		cout << *it << ' ';
-	}
-	cout << endl;
+		set<string>::iterator it;
+		cout << "Terminals : ";
+		for ( it = terminals.begin() ; it != terminals.end() ; it++){
+				cout << *it << ' ';
+		}
+		cout << endl;
 }
 
 void Grammar::printFirstSet(){
-	map<string,NonTerminal>::iterator it;
-	cout << "size in first of non ter " << nonTerminals.size () << endl;
-	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-		cout << it->first <<endl;
-		set<string> first_set = (it->second).firstSet;
-		set<string>::iterator it_set;
-		cout << "First Set : ";
-		for ( it_set = first_set.begin() ; it_set != first_set.end() ; it_set++){
-			cout << *it_set << ' ';
-		}
-		cout << endl;
+		map<string,NonTerminal>::iterator it;
+		//cout << "size in first of non ter " << nonTerminals.size () << endl;
+		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+				cout << it->first <<endl;
+				set<string> first_set = (it->second).firstSet;
+				set<string>::iterator it_set;
+				cout << "First Set : ";
+				for ( it_set = first_set.begin() ; it_set != first_set.end() ; it_set++){
+						cout << *it_set << ' ';
+				}
+				cout << endl;
 
-	}
+		}
 }
 
 void Grammar::printFollowSet(){
-	map<string,NonTerminal>::iterator it;
-	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-		cout << it->first <<endl;
-		set<string> fset = (it->second).followSet;
-		set<string>::iterator it_set;
-		cout << "Follow Set : ";
-		for ( it_set = fset.begin() ; it_set != fset.end() ; it_set++){
-			cout << *it_set << ' ';
-		}
-		cout << endl;
+		map<string,NonTerminal>::iterator it;
+		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+				cout << it->first <<endl;
+				set<string> fset = (it->second).followSet;
+				set<string>::iterator it_set;
+				cout << "Follow Set : ";
+				for ( it_set = fset.begin() ; it_set != fset.end() ; it_set++){
+						cout << *it_set << ' ';
+				}
+				cout << endl;
 
-	}
+		}
 }
 
 void Grammar::printParseTable(){
-	map<string,NonTerminal>::iterator it;
-	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-		cout << it->first <<endl;
-		map<string,string> pt = (it->second).parseTable;
-		map<string,string>::iterator it_mp;
-		cout << "Parse Table : ";
-		for ( it_mp = pt.begin() ; it_mp != pt.end() ; it_mp++){
-			cout << it_mp->first << " : " <<it_mp->second << endl;
-		}
-		cout << endl;
+		map<string,NonTerminal>::iterator it;
+		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+				cout << it->first <<endl;
+				map<string,string> pt = (it->second).parseTable;
+				map<string,string>::iterator it_mp;
+				cout << "Parse Table : " <<endl;
+				for ( it_mp = pt.begin() ; it_mp != pt.end() ; it_mp++){
+						cout << it_mp->first << " : " <<it_mp->second << endl;
+				}
+				cout << endl;
 
-	}
+		}
 }
