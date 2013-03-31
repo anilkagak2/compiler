@@ -10,10 +10,15 @@ int main () {
 	
 	Grammar g("grammar.txt");
 	g.printNonTerminals();
+	cout << endl;
 	g.printTerminals();
+	cout << endl;
 	g.printFirstSet();
+	cout << endl;
 	g.printFollowSet();
+	cout << endl;
 	g.printParseTable();
+	cout << endl;
 	return 0;
 
     //ifstream input("lex_output.txt");
