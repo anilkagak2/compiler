@@ -477,3 +477,99 @@ void Grammar::printParseTable(){
 
 	}
 }
+
+int how_many_match(string s,string t){
+    vector<string> t1 = splitstr(s);
+    vector<string> t2 = splitstr(t);
+    int count = 0;
+    for(int i=0; i<t1.size() && i<t2.size() ; i++){
+        if(t1[i]==t2[i]) count++;
+        else return count;
+    } 
+}
+
+void substr_token(string s,int front_tokens,string &front,string &back){
+    vector<string> t1 = splitstr(s);
+    vector<string> s1(t1.begin(),t1.begin()+front_tokens);
+    vector<string> s2(t1.begin()+front_tokens,t1.end());
+    
+    for(int i=0;i<s1.size();i++) front += s1[i];
+    for(int i=0;i<s2.size();i++) back += s2[i];
+    
+    front = trim(front);
+    back = trim(back);
+}
+
+void leftFactor(){
+    
+    map<string,NonTerminal> total_nt_map = nonTerminals;
+    map<string,NonTerminal> new_nt_map;
+
+    while(1){
+    
+        map<string,NonTerminal>::iterator it;
+	    for(it=new_nt_map.begin() ; it!= new_nt_map.end() ; it++){
+		    NonTerminal nt = it->second;
+            vector<string> prod = nt.productions;
+            vector<string> new_prod;
+            sort(prod.begin(),prod.end());
+            for(int i=0; i < prod.size();){
+                
+                int val = -1;
+                int j;
+                int count;
+
+                for(j=i+1;j<prod.size();j++){
+                    count = how_many_match(prod[j-1],prod[j]);
+                    if(count == 0) {
+                        break;
+                    }
+                    else if(val == -1) val = count;
+                    else { // to check for more then a pair
+                        if(count != val) break;
+                    }
+                } 
+              
+                if(j-i == 1){ // unique production, continue 
+                    new_prod.push_back(prod[i]);
+                }
+                // j is the first non matched index with i (j may also exceed size of prod)
+                if( j-i > 1 ){ // something matched
+                            
+                    //1. Remove all common prod
+                    //2. Add new prod 'common __NT_i'
+                    //3. Add one NT as '__NT_i'
+                    //4. Add new prods in new NT
+                   
+                    string front,back;
+                    substr_token(prod[i],count,front,back);
+                    string new_nt_name = generateName(nt->first);
+                
+                    // 2    
+                    new_prod.push_back(front+" "+new_nt_name);
+                
+                    NonTerminal new_nt;
+                    // 1 & 4
+                    for(int k=i;k<j;k++){ // Make new NT and change the current productions
+                        string start,end;
+                        substr_token(prod[k],count,start,end);
+                        new_nt.addProductions(end)
+                    }
+                
+                    // 3
+                    new_nt_map[new_nt_name] = new_nt;
+                }
+                i = j;
+            }
+
+            (it->second).productions = new_prod;
+        }
+   
+        // Break Condition
+        if(new_nt_map.empty())break;
+        else{ // TODO: add new_nt_map to total_nt_map
+           total_nt_map.insert(new_nt_map.begin(),new_nt_end());
+           new_nt_map.clear();
+        }
+    }
+}
