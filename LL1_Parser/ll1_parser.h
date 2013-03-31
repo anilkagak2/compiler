@@ -36,7 +36,6 @@ class Grammar {
 		void printFirstSet();
 		void printFollowSet();
 		void printParseTable();
-		void parse(string);
 
 	private:
 		map<string, NonTerminal> nonTerminals;
@@ -46,6 +45,8 @@ class Grammar {
 		void populateFirst();
 		void populateFollow();
 		void makeParse();
+		void parse(string);
+        void leftFactor();
 
 		/* Follow: Helper functions. */
 		inline bool isNonTerminal (string nt) {
