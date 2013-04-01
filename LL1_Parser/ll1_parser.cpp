@@ -483,7 +483,9 @@ Grammar::Grammar(string fileName){
 						nonTerminals[nonTerminalName] = nt;
 		}
 
-        printTerminals();
+        printNonTerminals();
+        leftFactor();
+        printNonTerminals();
 		calcNullable();
 		populateFirst();
 		populateFollow();
@@ -570,10 +572,14 @@ Grammar::addFirst(NonTerminal &nt,string str){
 void Grammar::printNonTerminals(){
 		map<string,NonTerminal>::iterator it;
 		//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
-		cout << "Non Terminals : ";
+		cout << "Grammer : ";
 		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-				cout << it->first << " " << endl;
-		}
+				cout << "NT "<<it->first << " " << endl;
+		        vector<string> prod = (it->second).productions;
+                for(int i=0;i<prod.size();i++)
+                    cout<< prod[i] <<"      ";
+                cout<<endl;
+        }
 }
 
 void Grammar::printTerminals(){
@@ -728,4 +734,5 @@ Grammar::leftFactor(){
            new_nt_map.clear();
         }
     }
+    nonTerminals = total_nt_map;
 }

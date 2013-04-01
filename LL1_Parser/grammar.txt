@@ -3,17 +3,15 @@
 %%
 
 S 
-  :a S e
-|B
+  :a b B
+| a b C
     ;
 
 B
-  :b B e
-|C
-       ;
+  : c
+  ;
 
 C
- :c C e
-|d
+ :d
          ;
 
