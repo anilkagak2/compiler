@@ -172,7 +172,7 @@ Grammar::populateFollow () {
 			// P[i]->x1 x2 x3.. xn
 			// 1 to n-1, although it'll go till n but the nth first will be empty
 			//while (ss >> nt) {
-			for (int i=0; i<tokens.size (); i++) {
+			for (int i=0; i<tokens.size () ; i++) {
 				nt = tokens[i];
                 		if (isNonTerminal (nt)) {
 					// TODO NEW CODE TO BE TESTED,-1
@@ -453,10 +453,10 @@ Grammar::Grammar(string fileName){
 				nt.nullable = false;
 				string nonTerminalName = "";
 
-				while(!file.eof() && data != "\t;"){
-						if(!file.eof() && data != "\t;" && data != "") {
-								if(data[0] != '\t'){
-										nonTerminalName = trim(data);
+				while(!file.eof() && data != ";"){
+						if(!file.eof() && data != ";" && data != "") {
+								if(data[0] != ':' && data[0] != '|'){
+										nonTerminalName = data;
 										//If non terminal in not in map
 										if(isNonTerminal(nonTerminalName)){
 												nt = nonTerminals[nonTerminalName];
@@ -466,7 +466,7 @@ Grammar::Grammar(string fileName){
 								else{
 										// Rules are of the form
 										// \t: primary_expression
-										data = data.substr(3);
+										data = data.substr(1);
 										nt.productions.push_back(trim(data));
 										if(data == EPSILON)
 												nt.nullable = true;
@@ -475,6 +475,7 @@ Grammar::Grammar(string fileName){
 								}
 						}
 						getline(file,data);
+						data = trim(data);
 				}
 				if(!file.eof())
 						nonTerminals[nonTerminalName] = nt;
