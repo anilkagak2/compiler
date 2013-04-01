@@ -81,7 +81,7 @@ class Grammar {
 		void removeIndirectLeftRecursion ();
 
 		/* Remove direct left recursion. */
-		void removeDirectLeftRecursion (string nt, vector<string> &);
+		bool removeDirectLeftRecursion (string nt, vector<string> &);
 
 		/* Generate name for the new NonTerminal. */
 		string generateName (string nt);
