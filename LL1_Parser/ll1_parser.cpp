@@ -452,10 +452,10 @@ Grammar::Grammar(string fileName){
 
 		getline(file,data);
 		while(!file.eof() && data != "%%"){
-				if(!file.eof() && data != "%%" && data != ""){
-						if(data[0] != '%'){
-								cout << "Error in Syntex of Grammar\n";
-								exit(EXIT_FAILURE);
+			if(!file.eof() && data != "%%" && data != ""){
+				if(data[0] != '%'){
+						cout << "Error in Syntex of Grammar\n";
+							exit(EXIT_FAILURE);
 						}
 
 						vector<string> all_token = splitstr(data);
@@ -478,7 +478,11 @@ Grammar::Grammar(string fileName){
 		}
 		while(!file.eof() ){
 				getline(file,data);
+				data = trim(data);
+				if(data == "")
+					continue;
 				NonTerminal nt;
+				set<string> tmp;
 				nt.nullable = false;
 				string nonTerminalName = "";
 
@@ -496,9 +500,14 @@ Grammar::Grammar(string fileName){
 										// Rules are of the form
 										// \t: primary_expression
 										data = data.substr(1);
-										nt.productions.push_back(trim(data));
+										data = trim(data);
+										if(data == ""){
+											cout << "Error : empty productions\n";
+											exit(EXIT_FAILURE);
+										}
+										tmp.insert(data);
 										if(data == EPSILON)
-												nt.nullable = true;
+											nt.nullable = true;
 
 										//					cout <<"Rules :" << data << endl;
 								}
@@ -506,8 +515,12 @@ Grammar::Grammar(string fileName){
 						getline(file,data);
 						data = trim(data);
 				}
-				if(!file.eof())
-						nonTerminals[nonTerminalName] = nt;
+				if(!file.eof()){
+					nt.productions.insert(nt.productions.begin(),tmp.begin(),tmp.end());	
+					nonTerminals[nonTerminalName] = nt;
+					
+				}
+
 		}
 
         printTerminals();
