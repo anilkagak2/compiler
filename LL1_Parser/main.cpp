@@ -19,7 +19,6 @@ int main () {
 	cout << endl;
 	g.printParseTable();
 	cout << endl;
-	return 0;
 
     //ifstream input("lex_output.txt");
     string input = get_file_contents("lex_output.txt");

@@ -197,6 +197,7 @@ Grammar::populateFollow () {
 
 	map<string, NonTerminal>::iterator it;
 	while (1) {
+        cout<<"In While" <<endl;
 	bool change = false;
 	for (it=nonTerminals.begin (); it!=nonTerminals.end (); it++) {
 		vector<string> P = it->second.productions;
@@ -213,7 +214,7 @@ Grammar::populateFollow () {
 					// TODO NEW CODE TO BE TESTED,-1
 					string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(""), concatString);
 					next = trim (next);
-					cout << "i+1 to n " << next << endl;
+					//cout << "i+1 to n " << next << endl;
 					set<string> f_next = firstOf (next);
 					f_next.erase (EPSILON);
 					// TODO
@@ -222,7 +223,7 @@ Grammar::populateFollow () {
 					bool subset = includes (follow.begin (), follow.end (),
 								f_next.begin (), f_next.end ());
 					if (!subset) {
-						cout << next <<" is subset " << " of " << nt << endl;
+					//	cout << next <<" is subset " << " of " << nt << endl;
 						follow.insert (f_next.begin (), f_next.end ());
 						//change |= subset;
 						change = true;
@@ -232,22 +233,22 @@ Grammar::populateFollow () {
 		
 			// TODO delete the last space	
 			// n to 1
-			for (int i=tokens.size ()-2; i>=0; i--) {
+			for (int i=tokens.size ()-1; i>=0; i--) {
 				nt = tokens[i];
 				// TODO NEW CODE TO BE TESTED, -1
 				string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(""), concatString);
 				next = trim (next);
-				cout << "i+1 to n " << next << endl;
+				//cout << "i+1 to n " << next << endl;
 				// TODO
 
 				if (isNonTerminal (nt) && nullable (next)) {
-					cout << "next is nullable " << next << endl;
+				//	cout << "next is nullable " << next << endl;
 					set<string> followPI = it->second.followSet;	// follow set of the current NT
 					set<string> &follow = nonTerminals[nt].followSet;
 					bool subset = includes (follow.begin (), follow.end (),
 								followPI.begin (), followPI.end ());
 					if (!subset) {
-						cout << next <<" is subset " << " of " << nt << endl;
+				//		cout << next <<" is subset " << " of " << nt << endl;
 						follow.insert (followPI.begin (), followPI.end ());
 						//change |= subset;
 						change = true;
@@ -333,19 +334,26 @@ Grammar::firstOf (string production) {
 //Tokenised, space separated input is assumed
 //eg: Id plus whitespace etc
 void Grammar::parse(string input){
-	queue<string> q = splitstr_queue(input);
+	cout <<"input: "<< input <<endl;
+    queue<string> q = splitstr_queue(input);
 	stack<string> s;
 
 	q.push(dollar);
 	s.push(dollar);
-
+    s.push(start);
+    cout<< "Parsing Stack: " <<endl; 
 	while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
-		if(s.top() == q.front()){
+        cout << s.top() <<endl;
+        if(s.top() == q.front()){
 			s.pop();
 			q.pop();
 		} 
 		else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
-			string prod = nonTerminals[s.top ()].parseTable[q.front()];
+			if(!isTerminal(q.front())){
+			    printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
+			    return;
+            }
+            string prod = nonTerminals[s.top ()].parseTable[q.front()];
 			stack<string> stk = splitstr_stack(prod);
 
 			s.pop();
@@ -382,7 +390,7 @@ void Grammar::makeParse(){
 				if(terminal == EPSILON){
 					eps_in = true;
 				}
-
+                else
 				tmp.parseTable[terminal] = prod;
 			}
 
@@ -533,13 +541,14 @@ Grammar::Grammar(string fileName){
 
 	cout << "Before removing left recursion " <<  endl;
 	printProductions ();
-	removeIndirectLeftRecursion ();
-	cout << "After removing left recursion " <<  endl;
+//	removeIndirectLeftRecursion ();
+	
+    cout << "After removing left recursion " <<  endl;
 	printProductions ();
 	calcNullable ();
 	populateFirst();
 	populateFollow();
-//	makeParse(); 
+	makeParse(); 
 }
 
 /*
@@ -621,9 +630,9 @@ Grammar::addFirst(NonTerminal &nt,string str){
 void Grammar::printProductions () {
 		map<string,NonTerminal>::iterator it;
 		//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
-		cout << "Non Terminals : ";
+		cout << "Productions : "<<endl;
 		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-				cout << it->first << " " << endl;
+				cout << it->first << " - >" << endl;
 				vector<string> p = it->second.productions;
 				for (int i=0; i<p.size (); i++) 
 					cout << p[i] << endl;
