@@ -167,15 +167,17 @@ Grammar::populateFollow () {
 		for (int i=0; i<P.size (); i++) {
 			stringstream ss (P[i]);
 			string nt, reverse_pi;
+			vector<string> tokens = splitstr (P[i]);
 
 			// P[i]->x1 x2 x3.. xn
 			// 1 to n-1, although it'll go till n but the nth first will be empty
-			while (ss >> nt) {
-				reverse_pi += nt + " ";
-				cout<<reverse_pi<<"      "<<ss.str()<<" "<<endl;
-                if (isNonTerminal (nt)) {
+			//while (ss >> nt) {
+			for (int i=0; i<tokens.size (); i++) {
+				nt = tokens[i];
+                		if (isNonTerminal (nt)) {
 					// TODO NEW CODE TO BE TESTED,-1
-					string next = ss.str ().substr (reverse_pi.length ()-1);
+					//string next = ss.str ().substr (reverse_pi.length ()-1);
+					string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(" "));
 					next = trim (next);
 					set<string> f_next = firstOf (next);
 					// TODO
@@ -192,12 +194,17 @@ Grammar::populateFollow () {
 		
 			// TODO delete the last space	
 			// n to 1
-			ss.str (reverse_pi);
-			reverse_pi = "";
-			while (ss >> nt) {
+			//ss.str (reverse_pi);
+			//reverse_pi = "";
+			//while (ss >> nt) {
+			reverse (tokens.begin (), tokens.end ());
+			for (int i=0; i<tokens.size (); i++) {
+				nt = tokens[i];
 				// TODO NEW CODE TO BE TESTED, -1
-				reverse_pi += nt + " ";
-				string next = ss.str ().substr (reverse_pi.length ()-1);
+				//reverse_pi += nt + " ";
+				//string next = ss.str ().substr (reverse_pi.length ()-1);
+				//next = trim (next);
+				string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(" "));
 				next = trim (next);
 				// TODO
 
@@ -245,17 +252,22 @@ Grammar::nullable (string P) {
  */
 set<string> 
 Grammar::firstOf (string production) {
-	stringstream ss (production);
+	//stringstream ss (production);
 	string nt;
 	set<string> first;
 
-	ss >> nt;
+	production = trim (production);
+	vector<string> tokens = splitstr (production);
+
+	if (tokens.empty ()) return first;
+
+	nt = tokens[0];
 	if (nt != "") {
 		if (isTerminal (nt)) first.insert (nt);
 		else {
 			bool isNt = isNonTerminal (nt);
 			if (!isNt) {
-                cout <<"Terminal"<< nt <<endl;
+                		cout <<"Terminal "<< nt <<endl;
 				cout << "Error firstOf: Symbol not in the grammar"
 					<< endl;
 				exit (EXIT_FAILURE);
@@ -268,9 +280,12 @@ Grammar::firstOf (string production) {
 					nonTerminals[nt].firstSet.end ());
 
 			// TODO NEW CODE TO BE TESTED
-			string to_check = ss.str ().substr (nt.length ());
-			trim (to_check);
-			set<string> f_next = firstOf (to_check);
+			//string to_check = ss.str ().substr (nt.length ());
+			//trim (to_check);
+
+			string next, back;
+			substr_token (production, 1, back, next);
+			set<string> f_next = firstOf (next);
 			// TODO
 
 			first.insert ( f_next.begin (), f_next.end ());
@@ -617,13 +632,14 @@ int how_many_match(string s,string t){
     } 
 }
 
-void substr_token(string s,int front_tokens,string &front,string &back){
+void
+Grammar::substr_token(string s,int front_tokens,string &front,string &back){
     vector<string> t1 = splitstr(s);
     vector<string> s1(t1.begin(),t1.begin()+front_tokens);
     vector<string> s2(t1.begin()+front_tokens,t1.end());
     
-    for(int i=0;i<s1.size();i++) front += s1[i];
-    for(int i=0;i<s2.size();i++) back += s2[i];
+    for(int i=0;i<s1.size();i++) front += s1[i] + " ";
+    for(int i=0;i<s2.size();i++) back += s2[i] + " ";
     
     front = trim(front);
     back = trim(back);

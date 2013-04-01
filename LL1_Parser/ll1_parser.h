@@ -10,6 +10,7 @@
 #include <string>
 #include <cstdlib>
 #include <cstdio>
+#include <numeric>
 
 using namespace std;
 
@@ -83,5 +84,8 @@ class Grammar {
 
 		/* Generate name for the new NonTerminal. */
 		string generateName (string nt);
+
+		/* Utilities */
+		void substr_token(string s,int front_tokens,string &front,string &back);
 };
 
