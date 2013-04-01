@@ -6,17 +6,6 @@ using namespace std;
 const string dollar="DOLLAR";
 const string EPSILON="EPS";
 
-vector <string> splitstr(string message){
-		stringstream ss(message);
-		string s;
-		vector <string> str;
-		while(ss>>s){
-				//cout<<s<<endl;
-				str.push_back(s);
-		}
-		return str;
-}
-
 //trimming
 std::string trim(const std::string& str,
 				const std::string& whitespace = " \t\n")
@@ -29,6 +18,19 @@ std::string trim(const std::string& str,
 		const auto int strRange = strEnd - strBegin + 1;
 
 		return str.substr(strBegin, strRange);
+}
+
+
+vector <string> splitstr(string message){
+		message = trim(message);
+        stringstream ss(message);
+		string s;
+		vector <string> str;
+		while(ss>>s){
+				//cout<<s<<endl;
+				str.push_back(s);
+		}
+		return str;
 }
 
 
@@ -657,10 +659,11 @@ Grammar::leftFactor(){
     map<string,NonTerminal> total_nt_map = nonTerminals;
     map<string,NonTerminal> new_nt_map;
 
+    cout<<"left Factor"<<endl;
     while(1){
     
         map<string,NonTerminal>::iterator it;
-	    for(it=new_nt_map.begin() ; it!= new_nt_map.end() ; it++){
+	    for(it=total_nt_map.begin() ; it!= total_nt_map.end() ; it++){
 		    NonTerminal nt = it->second;
             vector<string> prod = nt.productions;
             vector<string> new_prod;
@@ -678,7 +681,7 @@ Grammar::leftFactor(){
                     }
                     else if(val == -1) val = count;
                     else { // to check for more then a pair
-                        if(count != val) break;
+                        if(count < val) break;
                     }
                 } 
               
