@@ -76,8 +76,9 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 
 	// which are to be clubbed for the new NonTerminal
 	// START DEALING WITH OLD NONTERMINAL
-	for (int i=0; i<p.size (); i++) 
-		if (p[i].find_first_of (nt) == 0) {
+	for (int i=0; i<p.size (); i++) {
+		vector<string> tokens = splitstr (p[i]);
+		if ((tokens.size () > 0) && (tokens[0] == nt)) {
 			if (!generated) {
 				// Otherwise need to generate a new NonTerminal
 				newnt = generateName (nt);
@@ -88,6 +89,7 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 			left_p = trim (left_p);
 			to_add.insert (left_p+" "+newnt);
 		}
+	}
 
 	// check if there is any need to generate a new NonTerminal
 	if (find (left_club.begin (), left_club.end (), true) == left_club.end ())
@@ -144,8 +146,10 @@ Grammar::removeIndirectLeftRecursion () {
 			for (int i=0; i<productions.size (); i++) {
 				cout << "in production " << productions[i] << endl;
 				string nt = iit->first;
-				int pos = productions[i].find_first_of (nt);
-				if (pos == 0) {
+				vector<string> tokens = splitstr (productions[i]);
+			//	int pos = productions[i].find_first_of (nt);
+			//	if (pos == 0) {
+				if (tokens.size ()>0 && (tokens[0] == nt)) {
 					cout << "it in production " << productions[i] << endl;
 					string left_token = productions[i].substr (nt.length ());
 					vector<string> &from = iit->second.productions;
@@ -166,6 +170,11 @@ Grammar::removeIndirectLeftRecursion () {
 		//removeDirectLeftRecursion (out->first, productions);
 		removeDirectLeftRecursion (out->first, out->second.productions);
 	}
+}
+
+string
+concatString (string a, string b) {
+	return a + " " + b; 
 }
 
 /* Calculate the follow sets of the NonTerminals */
@@ -192,51 +201,50 @@ Grammar::populateFollow () {
 
 			// P[i]->x1 x2 x3.. xn
 			// 1 to n-1, although it'll go till n but the nth first will be empty
-			//while (ss >> nt) {
-			for (int i=0; i<tokens.size (); i++) {
+			for (int i=0; i<tokens.size ()-1; i++) {
 				nt = tokens[i];
                 		if (isNonTerminal (nt)) {
 					// TODO NEW CODE TO BE TESTED,-1
-					//string next = ss.str ().substr (reverse_pi.length ()-1);
-					string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(" "));
+					string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(""), concatString);
 					next = trim (next);
+					cout << "i+1 to n " << next << endl;
 					set<string> f_next = firstOf (next);
+					f_next.erase (EPSILON);
 					// TODO
 
 					set<string> &follow = nonTerminals[nt].followSet;
 					bool subset = includes (follow.begin (), follow.end (),
 								f_next.begin (), f_next.end ());
 					if (!subset) {
+						cout << next <<" is subset " << " of " << nt << endl;
 						follow.insert (f_next.begin (), f_next.end ());
-						change |= subset;
+						//change |= subset;
+						change = true;
 					}
 				}
 			}
 		
 			// TODO delete the last space	
 			// n to 1
-			//ss.str (reverse_pi);
-			//reverse_pi = "";
-			//while (ss >> nt) {
-			reverse (tokens.begin (), tokens.end ());
-			for (int i=0; i<tokens.size (); i++) {
+			for (int i=tokens.size ()-2; i>=0; i--) {
 				nt = tokens[i];
 				// TODO NEW CODE TO BE TESTED, -1
-				//reverse_pi += nt + " ";
-				//string next = ss.str ().substr (reverse_pi.length ()-1);
-				//next = trim (next);
-				string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(" "));
+				string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(""), concatString);
 				next = trim (next);
+				cout << "i+1 to n " << next << endl;
 				// TODO
 
 				if (isNonTerminal (nt) && nullable (next)) {
+					cout << "next is nullable " << next << endl;
 					set<string> followPI = it->second.followSet;	// follow set of the current NT
 					set<string> &follow = nonTerminals[nt].followSet;
 					bool subset = includes (follow.begin (), follow.end (),
 								followPI.begin (), followPI.end ());
 					if (!subset) {
+						cout << next <<" is subset " << " of " << nt << endl;
 						follow.insert (followPI.begin (), followPI.end ());
-						change |= subset;
+						//change |= subset;
+						change = true;
 					}
 				}
 			}
@@ -509,10 +517,10 @@ Grammar::Grammar(string fileName){
 	removeIndirectLeftRecursion ();
 	cout << "After removing left recursion " <<  endl;
 	printProductions ();
-/*		populateFirst();
-		populateFollow();
-		makeParse(); */
-    
+	calcNullable ();
+	populateFirst();
+	populateFollow();
+//	makeParse(); 
 }
 
 /*
