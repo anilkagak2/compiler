@@ -16,8 +16,6 @@ using namespace std;
 /* Class representing the abstract notion of NonTerminals */
 class NonTerminal {
 	public:
-		void addProductions (string p);
-
 		bool nullable;
 		set<string> 		firstSet;
 		set<string> 		followSet;
@@ -30,7 +28,7 @@ class NonTerminal {
  */
 class Grammar {
 	public:
-		Grammar(char* fileName);
+		Grammar(string fileName);
 		void parse(string);
 		void printNonTerminals();
 		void printTerminals();

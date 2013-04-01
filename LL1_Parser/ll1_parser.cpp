@@ -172,9 +172,10 @@ Grammar::populateFollow () {
 			// 1 to n-1, although it'll go till n but the nth first will be empty
 			while (ss >> nt) {
 				reverse_pi += nt + " ";
-				if (isNonTerminal (nt)) {
-					// TODO NEW CODE TO BE TESTED
-					string next = ss.str ().substr (reverse_pi.length ());
+				cout<<reverse_pi<<"      "<<ss.str()<<" "<<endl;
+                if (isNonTerminal (nt)) {
+					// TODO NEW CODE TO BE TESTED,-1
+					string next = ss.str ().substr (reverse_pi.length ()-1);
 					next = trim (next);
 					set<string> f_next = firstOf (next);
 					// TODO
@@ -194,9 +195,9 @@ Grammar::populateFollow () {
 			ss.str (reverse_pi);
 			reverse_pi = "";
 			while (ss >> nt) {
-				// TODO NEW CODE TO BE TESTED
+				// TODO NEW CODE TO BE TESTED, -1
 				reverse_pi += nt + " ";
-				string next = ss.str ().substr (reverse_pi.length ());
+				string next = ss.str ().substr (reverse_pi.length ()-1);
 				next = trim (next);
 				// TODO
 
@@ -254,6 +255,7 @@ Grammar::firstOf (string production) {
 		else {
 			bool isNt = isNonTerminal (nt);
 			if (!isNt) {
+                cout <<"Terminal"<< nt <<endl;
 				cout << "Error firstOf: Symbol not in the grammar"
 					<< endl;
 				exit (EXIT_FAILURE);
@@ -396,9 +398,9 @@ void Grammar::calcNullable(){
 		}
 }
 
-Grammar::Grammar(char * fileName){
+Grammar::Grammar(string fileName){
 		string data;
-		ifstream file(fileName,ifstream::in);
+		ifstream file(fileName.c_str(),ifstream::in);
 		if(!file.is_open()){
 				cout << "Error Opening file";
 				exit(EXIT_FAILURE);
@@ -462,10 +464,11 @@ Grammar::Grammar(char * fileName){
 						nonTerminals[nonTerminalName] = nt;
 		}
 
+        printTerminals();
 		populateFirst();
 		populateFollow();
 		makeParse();
-
+    
 }
 
 /*
@@ -669,7 +672,7 @@ Grammar::leftFactor(){
                    
                     string front,back;
                     substr_token(prod[i],count,front,back);
-                    string new_nt_name = generateName(nt->first);
+                    string new_nt_name = generateName(it->first);
                 
                     // 2    
                     new_prod.push_back(front+" "+new_nt_name);
@@ -679,7 +682,8 @@ Grammar::leftFactor(){
                     for(int k=i;k<j;k++){ // Make new NT and change the current productions
                         string start,end;
                         substr_token(prod[k],count,start,end);
-                        new_nt.addProductions(end);
+                        //new_nt.addProductions(end);
+                        new_nt.productions.push_back(end);
                     }
                 
                     // 3
@@ -694,7 +698,7 @@ Grammar::leftFactor(){
         // Break Condition
         if(new_nt_map.empty())break;
         else{ // TODO: add new_nt_map to total_nt_map
-           total_nt_map.insert(new_nt_map.begin(),new_nt_end());
+           total_nt_map.insert(new_nt_map.begin(),new_nt_map.end());
            new_nt_map.clear();
         }
     }
