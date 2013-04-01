@@ -33,6 +33,7 @@ class Grammar {
 		void parse(string);
 		void printNonTerminals();
 		void printTerminals();
+		void printProductions ();
 		void printFirstSet();
 		void printFollowSet();
 		void printParseTable();
@@ -57,7 +58,7 @@ class Grammar {
 		}
 
 		/* number to string */
-		inline string numToString (int i) {
+		string numToString (int i) {
 			stringstream ss;
 			ss << i;
 			return ss.str ();

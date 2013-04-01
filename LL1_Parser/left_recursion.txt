@@ -1,0 +1,17 @@
+%token + * id ( ) EPS
+%start E 
+%%
+
+E
+	: E + T
+	| T
+	;
+
+T
+	: T F
+	;
+
+F
+	: ( E )
+	| id
+	;

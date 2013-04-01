@@ -58,7 +58,7 @@ stack <string> splitstr_stack(string message){
 string
 Grammar::generateName (string nt) {
 	static int number = 0;
-	string newName = "__"+nt+numToString (number)+"__";
+	string newName = "ABC"+nt+numToString (number)+"ABC";
 	return newName;
 }
 
@@ -67,23 +67,30 @@ void
 Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 	vector<bool> left_club(p.size (), false);
 	set<string> to_add;
+	set<string>::iterator it;
+
+	string newnt;
+	bool generated=false;
 
 	// which are to be clubbed for the new NonTerminal
 	// START DEALING WITH OLD NONTERMINAL
 	for (int i=0; i<p.size (); i++) 
 		if (p[i].find_first_of (nt) == 0) {
+			if (!generated) {
+				// Otherwise need to generate a new NonTerminal
+				newnt = generateName (nt);
+				generated = true;
+			}
 			left_club[i] = true;
 			string left_p = p[i].substr (nt.length ());
 			left_p = trim (left_p);
-			to_add.insert (left_p);
+			to_add.insert (left_p+" "+newnt);
 		}
 
 	// check if there is any need to generate a new NonTerminal
-	if (find (left_club.begin (), left_club.end (), true) 
-		== left_club.end ()) return;
+	if (find (left_club.begin (), left_club.end (), true) == left_club.end ())
+		return ;
 
-	// Otherwise need to generate a new NonTerminal
-	string newnt = generateName (nt);
 	// bA' type
 	for (int i=0; i<p.size (); i++) 
 		if (!left_club[i]) p[i] += " " + newnt;
@@ -93,20 +100,31 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 	for (int i=0; i<p.size (); i++) 
 		if (left_club[i]) old_rules.insert (p[i]);
 
-	new_rules.erase (old_rules.begin (), old_rules.end ());
+	/* @Ak2
+	 * GREATEST MISTAKES OF CODING LIFE.
+	 * new_rules.erase (old_rules.begin (), old_rules.end ());
+	 */
+	for (it=old_rules.begin (); it != old_rules.end (); it++)
+		new_rules.erase (*it);
+
+	p.clear ();
+	for (it=new_rules.begin (); it != new_rules.end (); it++)
+		p.push_back (*it);
 	// END DEALING WITH OLD NONTERMINAL
 
 	// ADD NEW NONTERMINAL
 	// Add new productions in a new NonTerminal
 	NonTerminal NT;
-	set<string>::iterator it;
 	for (it=to_add.begin (); it != to_add.end (); it++)
-		NT.productions.push_back (*it+ " " + newnt);
+		NT.productions.push_back (*it);
 
 	NT.productions.push_back (EPSILON);
 	NT.nullable = true;
 
 	nonTerminals[newnt] = NT;
+	to_add.clear();
+	new_rules.clear();
+	old_rules.clear();
 }
 
 /* Remove indirect left recursion. */
@@ -143,7 +161,8 @@ Grammar::removeIndirectLeftRecursion () {
 			productions.insert (productions.end (), to_add.begin (), to_add.end ());
 		}
 		// Remove direct recursion for each production in the vector
-		removeDirectLeftRecursion (out->first, productions);
+		//removeDirectLeftRecursion (out->first, productions);
+		removeDirectLeftRecursion (out->first, out->second.productions);
 	}
 }
 
@@ -480,9 +499,15 @@ Grammar::Grammar(string fileName){
 		}
 
         printTerminals();
-		populateFirst();
+
+	cout << "Before removing left recursion " <<  endl;
+	printProductions ();
+	removeIndirectLeftRecursion ();
+	cout << "After removing left recursion " <<  endl;
+	printProductions ();
+/*		populateFirst();
 		populateFollow();
-		makeParse();
+		makeParse(); */
     
 }
 
@@ -556,6 +581,20 @@ Grammar::addFirst(NonTerminal &nt,string str){
 				exit(EXIT_FAILURE);	
 		}
 		return true;
+}
+
+void Grammar::printProductions () {
+		map<string,NonTerminal>::iterator it;
+		//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
+		cout << "Non Terminals : ";
+		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+				cout << it->first << " " << endl;
+				vector<string> p = it->second.productions;
+				for (int i=0; i<p.size (); i++) 
+					cout << p[i] << endl;
+
+			cout << endl;
+		}
 }
 
 void Grammar::printNonTerminals(){
