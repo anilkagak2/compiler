@@ -55,7 +55,8 @@ stack <string> splitstr_stack(string message){
 }
 
 /* Generate name for the new NonTerminal. */
-string generateName (string nt) {
+string
+Grammar::generateName (string nt) {
 	static int number = 0;
 	string newName = "__"+nt+numToString (number)+"__";
 	return newName;
@@ -64,7 +65,7 @@ string generateName (string nt) {
 /* Remove direct left recursion. */
 void
 Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
-	vecto<bool> left_club(p.size (), false);
+	vector<bool> left_club(p.size (), false);
 	set<string> to_add;
 
 	// which are to be clubbed for the new NonTerminal
@@ -74,9 +75,15 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 			left_club[i] = true;
 			string left_p = p[i].substr (nt.length ());
 			left_p = trim (left_p);
-			set.insert (left_p);
+			to_add.insert (left_p);
 		}
 
+	// check if there is any need to generate a new NonTerminal
+	if (find (left_club.begin (), left_club.end (), true) 
+		== left_club.end ()) return;
+
+	// Otherwise need to generate a new NonTerminal
+	string newnt = generateName (nt);
 	// bA' type
 	for (int i=0; i<p.size (); i++) 
 		if (!left_club[i]) p[i] += " " + newnt;
@@ -91,7 +98,6 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 
 	// ADD NEW NONTERMINAL
 	// Add new productions in a new NonTerminal
-	string newnt = generateName (nt);
 	NonTerminal NT;
 	set<string>::iterator it;
 	for (it=to_add.begin (); it != to_add.end (); it++)
@@ -112,7 +118,7 @@ Grammar::removeIndirectLeftRecursion () {
 	for (out=nonTerminals.begin (); out!=nonTerminals.end (); out++) {
 		cout << "NT " << out->first << endl;
 		vector<string> &productions = out->second.productions;
-		for (iit=nonTerminals.begin (); iit!=oit; iit++) {
+		for (iit=nonTerminals.begin (); iit!=out; iit++) {
 			cout << "\t searching for " << iit->first << endl;
 			vector<string> to_add;
 			for (int i=0; i<productions.size (); i++) {
@@ -134,7 +140,7 @@ Grammar::removeIndirectLeftRecursion () {
 					// current one
 				}
 			}
-			productions.push_back (productions.begin (), to_add.begin (), to_add.end ());
+			productions.insert (productions.end (), to_add.begin (), to_add.end ());
 		}
 		// Remove direct recursion for each production in the vector
 		removeDirectLeftRecursion (out->first, productions);
@@ -620,8 +626,8 @@ void substr_token(string s,int front_tokens,string &front,string &back){
     back = trim(back);
 }
 
-void leftFactor(){
-    
+void
+Grammar::leftFactor(){
     map<string,NonTerminal> total_nt_map = nonTerminals;
     map<string,NonTerminal> new_nt_map;
 
@@ -673,7 +679,7 @@ void leftFactor(){
                     for(int k=i;k<j;k++){ // Make new NT and change the current productions
                         string start,end;
                         substr_token(prod[k],count,start,end);
-                        new_nt.addProductions(end)
+                        new_nt.addProductions(end);
                     }
                 
                     // 3

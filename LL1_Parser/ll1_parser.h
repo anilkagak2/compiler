@@ -31,6 +31,7 @@ class NonTerminal {
 class Grammar {
 	public:
 		Grammar(char* fileName);
+		void parse(string);
 		void printNonTerminals();
 		void printTerminals();
 		void printFirstSet();
@@ -45,8 +46,7 @@ class Grammar {
 		void populateFirst();
 		void populateFollow();
 		void makeParse();
-		void parse(string);
-        void leftFactor();
+	        void leftFactor();
 
 		/* Follow: Helper functions. */
 		inline bool isNonTerminal (string nt) {
@@ -82,11 +82,6 @@ class Grammar {
 
 		/* Remove direct left recursion. */
 		void removeDirectLeftRecursion (string nt, vector<string> &);
-
-		/* Generate name for the new NonTerminal. */
-		string generateName (string nt);
-};
-
 
 		/* Generate name for the new NonTerminal. */
 		string generateName (string nt);
