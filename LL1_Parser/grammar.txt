@@ -1,26 +1,17 @@
-%token + * id ( ) EPS
-%start E 
+%token a b c d e
+%start S
 %%
 
-E
-	: T E'
-	;
+S 
+  :a b B
+| a b C
+    ;
 
-E'
-	: + T E'
-	| EPS
-	;
+B
+  : c
+  ;
 
-T
-	: F T'
-	;
+C
+ :d
+         ;
 
-T'
-	: * F T'
-	| EPS
-	;
-
-F
-	: ( E )
-	| id
-	;

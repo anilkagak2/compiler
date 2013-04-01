@@ -6,17 +6,6 @@ using namespace std;
 const string dollar="DOLLAR";
 const string EPSILON="EPS";
 
-vector <string> splitstr(string message){
-		stringstream ss(message);
-		string s;
-		vector <string> str;
-		while(ss>>s){
-				//cout<<s<<endl;
-				str.push_back(s);
-		}
-		return str;
-}
-
 //trimming
 std::string trim(const std::string& str,
 				const std::string& whitespace = " \t\n")
@@ -29,6 +18,19 @@ std::string trim(const std::string& str,
 		const auto int strRange = strEnd - strBegin + 1;
 
 		return str.substr(strBegin, strRange);
+}
+
+
+vector <string> splitstr(string message){
+		message = trim(message);
+        stringstream ss(message);
+		string s;
+		vector <string> str;
+		while(ss>>s){
+				//cout<<s<<endl;
+				str.push_back(s);
+		}
+		return str;
 }
 
 
@@ -58,7 +60,7 @@ stack <string> splitstr_stack(string message){
 string
 Grammar::generateName (string nt) {
 	static int number = 0;
-	string newName = "ABC"+nt+numToString (number)+"ABC";
+	string newName = "__"+nt+numToString (number)+"__";
 	return newName;
 }
 
@@ -469,12 +471,13 @@ Grammar::Grammar(string fileName){
 		while(!file.eof() ){
 				getline(file,data);
 				NonTerminal nt;
+				nt.nullable = false;
 				string nonTerminalName = "";
 
-				while(!file.eof() && data != "\t;"){
-						if(!file.eof() && data != "\t;" && data != "") {
-								if(data[0] != '\t'){
-										nonTerminalName = trim(data);
+				while(!file.eof() && data != ";"){
+						if(!file.eof() && data != ";" && data != "") {
+								if(data[0] != ':' && data[0] != '|'){
+										nonTerminalName = data;
 										//If non terminal in not in map
 										if(isNonTerminal(nonTerminalName)){
 												nt = nonTerminals[nonTerminalName];
@@ -484,7 +487,7 @@ Grammar::Grammar(string fileName){
 								else{
 										// Rules are of the form
 										// \t: primary_expression
-										data = data.substr(3);
+										data = data.substr(1);
 										nt.productions.push_back(trim(data));
 										if(data == EPSILON)
 												nt.nullable = true;
@@ -493,6 +496,7 @@ Grammar::Grammar(string fileName){
 								}
 						}
 						getline(file,data);
+						data = trim(data);
 				}
 				if(!file.eof())
 						nonTerminals[nonTerminalName] = nt;
@@ -545,9 +549,13 @@ void Grammar::populateFirst(){
 
 								for(int i=1;i<alphabet.size();i++){
 										string sub_prod = "";
-										for(int j=0;j<i;j++)
-												sub_prod += alphabet[j];
+										for(int j=0;j<i;j++){
+											sub_prod += alphabet[j];
+											sub_prod += ' ';	
+										}
+										//cout <<" sub_prod : " <<sub_prod <<endl;
 										if(nullable(sub_prod)){
+											//cout << "Nullable : " <<sub_prod << endl;
 												if(addFirst(nt,alphabet[i]))
 														isChanged = true;
 										}
@@ -600,10 +608,14 @@ void Grammar::printProductions () {
 void Grammar::printNonTerminals(){
 		map<string,NonTerminal>::iterator it;
 		//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
-		cout << "Non Terminals : ";
+		cout << "Grammer : ";
 		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-				cout << it->first << " " << endl;
-		}
+				cout << "NT "<<it->first << " " << endl;
+		        vector<string> prod = (it->second).productions;
+                for(int i=0;i<prod.size();i++)
+                    cout<< prod[i] <<"      ";
+                cout<<endl;
+        }
 }
 
 void Grammar::printTerminals(){
@@ -689,10 +701,11 @@ Grammar::leftFactor(){
     map<string,NonTerminal> total_nt_map = nonTerminals;
     map<string,NonTerminal> new_nt_map;
 
+    cout<<"left Factor"<<endl;
     while(1){
     
         map<string,NonTerminal>::iterator it;
-	    for(it=new_nt_map.begin() ; it!= new_nt_map.end() ; it++){
+	    for(it=total_nt_map.begin() ; it!= total_nt_map.end() ; it++){
 		    NonTerminal nt = it->second;
             vector<string> prod = nt.productions;
             vector<string> new_prod;
@@ -710,7 +723,7 @@ Grammar::leftFactor(){
                     }
                     else if(val == -1) val = count;
                     else { // to check for more then a pair
-                        if(count != val) break;
+                        if(count < val) break;
                     }
                 } 
               
@@ -757,4 +770,5 @@ Grammar::leftFactor(){
            new_nt_map.clear();
         }
     }
+    nonTerminals = total_nt_map;
 }
