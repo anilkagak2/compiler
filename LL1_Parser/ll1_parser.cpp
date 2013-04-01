@@ -65,7 +65,7 @@ Grammar::generateName (string nt) {
 }
 
 /* Remove direct left recursion. */
-void
+bool
 Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 	vector<bool> left_club(p.size (), false);
 	set<string> to_add;
@@ -93,7 +93,7 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 
 	// check if there is any need to generate a new NonTerminal
 	if (find (left_club.begin (), left_club.end (), true) == left_club.end ())
-		return ;
+		return false;		// no new non terminal
 
 	// bA' type
 	for (int i=0; i<p.size (); i++) 
@@ -129,6 +129,7 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 	to_add.clear();
 	new_rules.clear();
 	old_rules.clear();
+	return true;
 }
 
 /* Remove indirect left recursion. */
@@ -137,6 +138,8 @@ Grammar::removeIndirectLeftRecursion () {
 	// for 1 to n
 	map<string, NonTerminal>::iterator out, iit;
 	cout << "Removing indirect left recusion " << endl;
+	while (1) {
+	bool change = false;
 	for (out=nonTerminals.begin (); out!=nonTerminals.end (); out++) {
 		cout << "NT " << out->first << endl;
 		vector<string> &productions = out->second.productions;
@@ -168,7 +171,10 @@ Grammar::removeIndirectLeftRecursion () {
 		}
 		// Remove direct recursion for each production in the vector
 		//removeDirectLeftRecursion (out->first, productions);
-		removeDirectLeftRecursion (out->first, out->second.productions);
+		change |= removeDirectLeftRecursion (out->first, out->second.productions);
+	}
+
+	if (!change) break;
 	}
 }
 
