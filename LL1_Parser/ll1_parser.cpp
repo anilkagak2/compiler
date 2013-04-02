@@ -65,8 +65,8 @@ Grammar::generateName (string nt) {
 }
 
 /* Remove direct left recursion. */
-bool
-Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
+void
+Grammar::removeDirectLeftRecursion (string nt, vector<string> &p, vector<NonTerminal> &vnewnt, vector<string> &snewnt) {
 	vector<bool> left_club(p.size (), false);
 	set<string> to_add;
 	set<string>::iterator it;
@@ -93,7 +93,7 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 
 	// check if there is any need to generate a new NonTerminal
 	if (find (left_club.begin (), left_club.end (), true) == left_club.end ())
-		return false;		// no new non terminal
+		return ;		// no new non terminal
 
 	// bA' type
 	for (int i=0; i<p.size (); i++) 
@@ -125,57 +125,70 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p) {
 	NT.productions.push_back (EPSILON);
 	NT.nullable = true;
 
-	nonTerminals[newnt] = NT;
-	to_add.clear();
-	new_rules.clear();
-	old_rules.clear();
-	return true;
+//	nonTerminals[newnt] = NT;
+	vnewnt.push_back (NT);
+	snewnt.push_back (newnt);
 }
 
 /* Remove indirect left recursion. */
 void
 Grammar::removeIndirectLeftRecursion () {
-	// for 1 to n
-	map<string, NonTerminal>::iterator out, iit;
-	cout << "Removing indirect left recusion " << endl;
-	while (1) {
-	bool change = false;
+	vector<NonTerminal> vnt, vnewnt;
+	vector<string>	snt, snewnt;
+	map<string, NonTerminal>::iterator out;
+
 	for (out=nonTerminals.begin (); out!=nonTerminals.end (); out++) {
-		cout << "NT " << out->first << endl;
-		vector<string> &productions = out->second.productions;
-		for (iit=nonTerminals.begin (); iit!=out; iit++) {
-			cout << "\t searching for " << iit->first << endl;
-			vector<string> to_add;
-			for (int i=0; i<productions.size (); i++) {
-				cout << "in production " << productions[i] << endl;
-				string nt = iit->first;
-				vector<string> tokens = splitstr (productions[i]);
-			//	int pos = productions[i].find_first_of (nt);
-			//	if (pos == 0) {
+		snt.push_back (out->first);
+		vnt.push_back (out->second);
+	}
+
+	cout << "Removing indirect left recusion " << endl;
+
+	for (int i=0; i<vnt.size (); i++) {
+		cout << "NT " << snt[i] << endl;
+		vector<string> &productions = vnt[i].productions;
+		for (int j=0; j<i; j++) {
+			cout << "\t searching for " << snt[j] << endl;
+			for (int k=0; k<productions.size (); k++) {
+				vector<string> to_add;
+
+				cout << "in production " << productions[k] << endl;
+				string nt = snt[j];
+				vector<string> tokens = splitstr (productions[k]);
 				if (tokens.size ()>0 && (tokens[0] == nt)) {
-					cout << "it in production " << productions[i] << endl;
-					string left_token = productions[i].substr (nt.length ());
-					vector<string> &from = iit->second.productions;
+					cout << "it in production " << productions[k] << endl;
+					string left_token = productions[k].substr (nt.length ());
+					vector<string> &from = vnt[j].productions;
 					// replace the ith by the 1st rule here & place the remaining at the end instead of erasing this element
 					if (from.size () > 0)
-						productions[i] = from[0] + " " + left_token;
+						productions[k] = from[0] + " " + left_token;
 
-					for (int i=1; i<from.size (); i++)
-						to_add.push_back (from[i]+" "+left_token);
+					for (int p=1; p<from.size (); p++)
+						to_add.push_back (from[p]+" "+left_token);
 
 					// add these rules to the productions & remove the
 					// current one
 				}
+				productions.insert (productions.end (), to_add.begin (), to_add.end ());
 			}
-			productions.insert (productions.end (), to_add.begin (), to_add.end ());
 		}
 		// Remove direct recursion for each production in the vector
-		//removeDirectLeftRecursion (out->first, productions);
-		change |= removeDirectLeftRecursion (out->first, out->second.productions);
+		removeDirectLeftRecursion (snt[i], vnt[i].productions, vnewnt, snewnt);
 	}
 
-	if (!change) break;
+	cout << "Start of new non terminals " << endl;
+	for (int i=0; i<vnewnt.size (); i++) {
+		cout << snewnt[i] << "-->" << endl;
+		for (int j=0; j<vnewnt[i].productions.size (); j++) 
+		cout << vnewnt[i].productions[j] << endl;
+		cout << endl;
 	}
+	cout << "End of new non terminals " << endl;
+
+	vnt.insert (vnt.end (), vnewnt.begin (), vnewnt.end ());
+	snt.insert (snt.end (), snewnt.begin (), snewnt.end ());
+
+	for (int i=0; i<vnt.size (); i++) nonTerminals[snt[i]] = vnt[i];
 }
 
 string
@@ -541,7 +554,7 @@ Grammar::Grammar(string fileName){
 
 	cout << "Before removing left recursion " <<  endl;
 	printProductions ();
-//	removeIndirectLeftRecursion ();
+	removeIndirectLeftRecursion ();
 	
     cout << "After removing left recursion " <<  endl;
 	printProductions ();

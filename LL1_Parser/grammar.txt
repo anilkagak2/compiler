@@ -13,7 +13,7 @@ X
 
 Y
 	: * T
-    | EPS
+    	| EPS
 	;
 
 T
