@@ -60,7 +60,7 @@ stack <string> splitstr_stack(string message){
 string
 Grammar::generateName (string nt) {
 	static int number = 0;
-	string newName = "__"+nt+numToString (number)+"__";
+	string newName = "__"+nt+numToString (number++)+"__";
 	return newName;
 }
 
@@ -125,7 +125,6 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p, vector<NonTerm
 	NT.productions.push_back (EPSILON);
 	NT.nullable = true;
 
-//	nonTerminals[newnt] = NT;
 	vnewnt.push_back (NT);
 	snewnt.push_back (newnt);
 }
@@ -142,21 +141,31 @@ Grammar::removeIndirectLeftRecursion () {
 		vnt.push_back (out->second);
 	}
 
-	//cout << "Removing indirect left recusion " << endl;
+	cout << "Removing indirect left recusion " << endl;
 
 	for (int i=0; i<vnt.size (); i++) {
-		//cout << "NT " << snt[i] << endl;
+#ifdef _DEBUG_
+		cout << "NT " << snt[i] << endl;
+#endif
 		vector<string> &productions = vnt[i].productions;
 		for (int j=0; j<i; j++) {
-			//cout << "\t searching for " << snt[j] << endl;
+		//for (int j=0; j<vnt.size (); j++) {
+
+#ifdef _DEBUG_
+			cout << "\t searching for " << snt[j] << endl;
+#endif
 			for (int k=0; k<productions.size (); k++) {
 				vector<string> to_add;
 
-				//cout << "in production " << productions[k] << endl;
+#ifdef _DEBUG_
+				cout << "in production " << productions[k] << endl;
+#endif
 				string nt = snt[j];
 				vector<string> tokens = splitstr (productions[k]);
 				if (tokens.size ()>0 && (tokens[0] == nt)) {
-					//cout << "it in production " << productions[k] << endl;
+#ifdef _DEBUG_
+					cout << "it in production " << productions[k] << endl;
+#endif
 					string left_token = productions[k].substr (nt.length ());
 					vector<string> &from = vnt[j].productions;
 					// replace the ith by the 1st rule here & place the remaining at the end instead of erasing this element
@@ -176,14 +185,17 @@ Grammar::removeIndirectLeftRecursion () {
 		removeDirectLeftRecursion (snt[i], vnt[i].productions, vnewnt, snewnt);
 	}
 
-	//cout << "Start of new non terminals " << endl;
-	//for (int i=0; i<vnewnt.size (); i++) {
-		//cout << snewnt[i] << "-->" << endl;
-		//for (int j=0; j<vnewnt[i].productions.size (); j++) 
-		//cout << vnewnt[i].productions[j] << endl;
-		//cout << endl;
-	//}
-	//cout << "End of new non terminals " << endl;
+	if (vnewnt.size () > 0) {
+		cout << "Start of new non terminals " << endl;
+		for (int i=0; i<vnewnt.size (); i++) {
+			cout << snewnt[i] << "-->" << endl;
+			for (int j=0; j<vnewnt[i].productions.size (); j++) 
+			cout << vnewnt[i].productions[j] << endl;
+			cout << endl;
+		}
+		cout << "End of new non terminals " << endl;
+		cout << endl;
+	}
 
 	vnt.insert (vnt.end (), vnewnt.begin (), vnewnt.end ());
 	snt.insert (snt.end (), snewnt.begin (), snewnt.end ());
@@ -210,7 +222,7 @@ Grammar::populateFollow () {
 
 	map<string, NonTerminal>::iterator it;
 	while (1) {
-        cout<<"In While" <<endl;
+        //cout<<"In While" <<endl;
 	bool change = false;
 	for (it=nonTerminals.begin (); it!=nonTerminals.end (); it++) {
 		vector<string> P = it->second.productions;
@@ -355,33 +367,44 @@ void Grammar::parse(string input){
 	s.push(dollar);
     s.push(start);
     cout<< "Parsing Stack: " <<endl; 
-	while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
-        cout << s.top() <<endl;
-        if(s.top() == q.front()){
-			s.pop();
-			q.pop();
-		} 
-		else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
-			if(!isTerminal(q.front())){
+    while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
+	    cout << s.top() <<endl;
+	    if(s.top() == q.front()){
+		    s.pop();
+		    q.pop();
+	    } 
+	    else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
+		    if(!isTerminal(q.front())){
 			    printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
 			    return;
-            }
-            string prod = nonTerminals[s.top ()].parseTable[q.front()];
-			stack<string> stk = splitstr_stack(prod);
+		    }
 
-			s.pop();
-			if(stk.top() != EPSILON){ // if prod is epsilon, then just pop
-				while(!stk.empty()){
-					s.push(stk.top());
-					stk.pop();
-				}
-			}
-		}
-		else{ // error
-			printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
-			return;
-		}
-	}
+		    if(nonTerminals[s.top ()].parseTable.find(q.front()) == nonTerminals[s.top()].parseTable.end()){
+
+			    printf("Terminal not found for nonTerminal: %s %s\n",q.front().c_str(),s.top ().c_str ());
+			    return;
+		    }
+
+		    string prod = nonTerminals[s.top ()].parseTable[q.front()];
+		    stack<string> stk = splitstr_stack(prod);
+
+		    s.pop();
+		    if(stk.empty()){
+			    printf("Empty production in grammer is not allowed: %s\n",q.front ().c_str ());
+			    return;
+		    }
+		    if(stk.top() != EPSILON){ // if prod is epsilon, then just pop
+			    while(!stk.empty()){
+				    s.push(stk.top());
+				    stk.pop();
+			    }
+		    }
+	    }
+	    else{ // error
+		    printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
+		    return;
+	    }
+    }
 }
 
 void Grammar::makeParse(){
@@ -555,10 +578,12 @@ Grammar::Grammar(string fileName){
 	cout << "Before removing left recursion " <<  endl;
 	printProductions ();
 	removeIndirectLeftRecursion ();
-	//leftFactor();
-    	cout << "After removing left recursion " <<  endl;
+
+	cout << "After removing left recursion " <<  endl;
 	printProductions ();
-	
+	leftFactor();
+	cout << "After removing left Factoring " <<  endl;
+	printProductions ();
 	calcNullable ();
 	populateFirst();
 	populateFollow();
@@ -623,22 +648,22 @@ void Grammar::populateFirst(){
  */ 
 bool
 Grammar::addFirst(NonTerminal &nt,string str){
-		if(isNonTerminal(str)){
-				if( includes (nt.firstSet.begin (), nt.firstSet.end (), 
-										nonTerminals[str].firstSet.begin (), nonTerminals[str].firstSet.end () ) )
-						return false;
-				set<string> first = nonTerminals[str].firstSet;
-				nt.firstSet.insert(first.begin (), first.end ());
-		}
-		else if (isTerminal(str)){
-				if(nt.firstSet.find(str) != nt.firstSet.end())
-						return false;
-				nt.firstSet.insert(str);
-		}else{
-				cout << "Cannot identify the string : "<<str<<endl;
-				exit(EXIT_FAILURE);	
-		}
-		return true;
+	if(isNonTerminal(str)){
+		if( includes (nt.firstSet.begin (), nt.firstSet.end (), 
+					nonTerminals[str].firstSet.begin (), nonTerminals[str].firstSet.end () ) )
+			return false;
+		set<string> first = nonTerminals[str].firstSet;
+		nt.firstSet.insert(first.begin (), first.end ());
+	}
+	else if (isTerminal(str)){
+		if(nt.firstSet.find(str) != nt.firstSet.end())
+			return false;
+		nt.firstSet.insert(str);
+	}else{
+		cout << "Cannot identify the string : "<<str<<endl;
+		exit(EXIT_FAILURE);	
+	}
+	return true;
 }
 
 void Grammar::printProductions () {

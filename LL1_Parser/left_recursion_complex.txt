@@ -1,0 +1,21 @@
+%token x y c d EPS
+%start A
+%%
+
+A
+	: B x y
+	| x
+	;
+
+B
+	: C D
+	;
+
+C
+	: A
+	| c
+	;
+
+D
+	: d
+	;
