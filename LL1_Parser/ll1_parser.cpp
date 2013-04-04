@@ -142,21 +142,21 @@ Grammar::removeIndirectLeftRecursion () {
 		vnt.push_back (out->second);
 	}
 
-	cout << "Removing indirect left recusion " << endl;
+	//cout << "Removing indirect left recusion " << endl;
 
 	for (int i=0; i<vnt.size (); i++) {
-		cout << "NT " << snt[i] << endl;
+		//cout << "NT " << snt[i] << endl;
 		vector<string> &productions = vnt[i].productions;
 		for (int j=0; j<i; j++) {
-			cout << "\t searching for " << snt[j] << endl;
+			//cout << "\t searching for " << snt[j] << endl;
 			for (int k=0; k<productions.size (); k++) {
 				vector<string> to_add;
 
-				cout << "in production " << productions[k] << endl;
+				//cout << "in production " << productions[k] << endl;
 				string nt = snt[j];
 				vector<string> tokens = splitstr (productions[k]);
 				if (tokens.size ()>0 && (tokens[0] == nt)) {
-					cout << "it in production " << productions[k] << endl;
+					//cout << "it in production " << productions[k] << endl;
 					string left_token = productions[k].substr (nt.length ());
 					vector<string> &from = vnt[j].productions;
 					// replace the ith by the 1st rule here & place the remaining at the end instead of erasing this element
@@ -176,14 +176,14 @@ Grammar::removeIndirectLeftRecursion () {
 		removeDirectLeftRecursion (snt[i], vnt[i].productions, vnewnt, snewnt);
 	}
 
-	cout << "Start of new non terminals " << endl;
-	for (int i=0; i<vnewnt.size (); i++) {
-		cout << snewnt[i] << "-->" << endl;
-		for (int j=0; j<vnewnt[i].productions.size (); j++) 
-		cout << vnewnt[i].productions[j] << endl;
-		cout << endl;
-	}
-	cout << "End of new non terminals " << endl;
+	//cout << "Start of new non terminals " << endl;
+	//for (int i=0; i<vnewnt.size (); i++) {
+		//cout << snewnt[i] << "-->" << endl;
+		//for (int j=0; j<vnewnt[i].productions.size (); j++) 
+		//cout << vnewnt[i].productions[j] << endl;
+		//cout << endl;
+	//}
+	//cout << "End of new non terminals " << endl;
 
 	vnt.insert (vnt.end (), vnewnt.begin (), vnewnt.end ());
 	snt.insert (snt.end (), snewnt.begin (), snewnt.end ());
@@ -555,9 +555,10 @@ Grammar::Grammar(string fileName){
 	cout << "Before removing left recursion " <<  endl;
 	printProductions ();
 	removeIndirectLeftRecursion ();
-	
-    cout << "After removing left recursion " <<  endl;
+	//leftFactor();
+    	cout << "After removing left recursion " <<  endl;
 	printProductions ();
+	
 	calcNullable ();
 	populateFirst();
 	populateFollow();

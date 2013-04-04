@@ -1,3 +1,1 @@
-#define farzi;
-a = b;
-chambu = farzi;
+int a;
