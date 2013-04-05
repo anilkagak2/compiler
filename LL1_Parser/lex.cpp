@@ -48,7 +48,7 @@ string get_file_contents(const char *filename)
 
 void lex() {
 
-	cout<<"Input filename: "<<endl;
+	//cout<<"Input filename: "<<endl;
 	string filename = "input_regex.txt";
 	//   cin>>filename;
 
@@ -86,7 +86,7 @@ void lex() {
 		cout<<endl;
 	}
 
-	cout<<" Write the index of the regex corresponding to Identifiers class (0 based index) : "<<endl;
+/*	cout<<" Write the index of the regex corresponding to Identifiers class (0 based index) : "<<endl;
 	int id_class;
 	cin >> id_class;
 
@@ -95,7 +95,7 @@ void lex() {
 		//exit(EXIT_FAILURE);
 		cin >> id_class;
 	}
-
+*/
 	ofstream of("lex_output.txt");
 
 
@@ -104,7 +104,7 @@ void lex() {
 	vector< vector<string> > symbol_table(regex.size());
 
 	//d.print_transitions ();
-	cout<<"Give input string: "<<endl;
+	cout<<"Give input file name: "<<endl;
 	string input_file;
 	cin >> input_file;
 	string input = get_file_contents(input_file.c_str());
@@ -160,6 +160,8 @@ void lex() {
 		symbol_table[accepting_dfa].push_back(output);
 		//string output(input[current],input[current+max_advance]);
 		//cout << "< "<<token_class[accepting_dfa] <<" , "<<output<<" >" << endl;
+		cout<<output<<endl;
+		if(output != "\n" && output != "\t" && output != " ") 
 		of <<token_class[accepting_dfa]<< endl;
 
 		current += max_advance;
