@@ -793,7 +793,7 @@ Grammar::leftFactor(){
 
 				for(j=i+1;j<prod.size();j++){
 					count = how_many_match(prod[j-1],prod[j]);
-					cout << "Count: "<<count<<" " << prod[j-1]<< "    ->    " << prod[j] <<endl;
+					//cout << "Count: "<<count<<" " << prod[j-1]<< "    ->    " << prod[j] <<endl;
 					if(count == 0) {
 						break;
 					}
