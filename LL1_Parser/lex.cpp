@@ -144,7 +144,7 @@ void lex() {
 		}
 
 		if(max_advance == -1 || max_advance == 0) {
-			cout << "Error in lexical Analysis" <<endl; 
+			cout << "Error in lexical Analysis: No dfa accepted it" <<endl; 
 			exit(1);
 		}
 

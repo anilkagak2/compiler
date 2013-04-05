@@ -1,0 +1,15 @@
+%token EPS a b c d e
+%start S
+%%
+
+S 
+    : a
+    | EPS
+;
+
+A
+    : B S
+    ;
+B
+    : A b
+    ;

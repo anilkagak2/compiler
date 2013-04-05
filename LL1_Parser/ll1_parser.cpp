@@ -26,6 +26,7 @@ vector <string> splitstr(string message){
         stringstream ss(message);
 		string s;
 		vector <string> str;
+        if(message.empty()) return str;
 		while(ss>>s){
 				//cout<<s<<endl;
 				str.push_back(s);
@@ -227,17 +228,19 @@ Grammar::populateFollow () {
 	for (it=nonTerminals.begin (); it!=nonTerminals.end (); it++) {
 		vector<string> P = it->second.productions;
 		for (int i=0; i<P.size (); i++) {
-			stringstream ss (P[i]);
-			string nt, reverse_pi;
+			string nt;
 			vector<string> tokens = splitstr (P[i]);
 
 			// P[i]->x1 x2 x3.. xn
 			// 1 to n-1, although it'll go till n but the nth first will be empty
-			for (int i=0; i<tokens.size ()-1; i++) {
-				nt = tokens[i];
+			//TODO: Farzi Error
+            for (int k=0; k<(tokens.size ()-1); k++) {
+			    cout << "token: "<<tokens.size() <<endl;
+                if(tokens.empty()) break;
+                nt = tokens[k];
                 		if (isNonTerminal (nt)) {
 					// TODO NEW CODE TO BE TESTED,-1
-					string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(""), concatString);
+					string next = accumulate (tokens.begin ()+k+1, tokens.end (), string(""), concatString);
 					next = trim (next);
 					//cout << "i+1 to n " << next << endl;
 					set<string> f_next = firstOf (next);
@@ -258,10 +261,10 @@ Grammar::populateFollow () {
 		
 			// TODO delete the last space	
 			// n to 1
-			for (int i=tokens.size ()-1; i>=0; i--) {
-				nt = tokens[i];
+			for (int p=tokens.size ()-1; p>=0; p--) {
+				nt = tokens[p];
 				// TODO NEW CODE TO BE TESTED, -1
-				string next = accumulate (tokens.begin ()+i+1, tokens.end (), string(""), concatString);
+				string next = accumulate (tokens.begin ()+p+1, tokens.end (), string(""), concatString);
 				next = trim (next);
 				//cout << "i+1 to n " << next << endl;
 				// TODO
@@ -374,7 +377,7 @@ void Grammar::parse(string input){
 		    q.pop();
 	    } 
 	    else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
-		    if(!isTerminal(q.front())){
+		    if((!isTerminal(q.front())) && q.front() != dollar){
 			    printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
 			    return;
 		    }
@@ -401,7 +404,7 @@ void Grammar::parse(string input){
 		    }
 	    }
 	    else{ // error
-		    printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
+		    printf("Error occured , stack does not contain terminal and Nonterminal: %s\n",q.front ().c_str ());
 		    return;
 	    }
     }
@@ -576,17 +579,19 @@ Grammar::Grammar(string fileName){
 	printTerminals();
 
 	cout << "Before removing left recursion " <<  endl;
-	printProductions ();
+	//printProductions ();
 	removeIndirectLeftRecursion ();
 
 	cout << "After removing left recursion " <<  endl;
-	printProductions ();
+	//printProductions ();
 	leftFactor();
 	cout << "After removing left Factoring " <<  endl;
-	printProductions ();
+//	printProductions ();
 	calcNullable ();
 	populateFirst();
-	populateFollow();
+	cout << "Populate First " <<  endl;
+
+    populateFollow();
 	makeParse(); 
 }
 
@@ -619,7 +624,9 @@ void Grammar::populateFirst(){
 			//For each production
 			for(vit=nt.productions.begin();vit!=nt.productions.end();vit++){
 				vector<string> alphabet = splitstr(*vit);
-				if(addFirst(nt,alphabet[0]))
+				//cout << alphabet[0] <<endl;
+                if(alphabet.empty()) continue;
+                if(addFirst(nt,alphabet[0]))
 					isChanged = true;
 
 				for(int i=1;i<alphabet.size();i++){
@@ -749,18 +756,33 @@ void Grammar::printParseTable(){
 }
 
 int how_many_match(string s,string t){
-	vector<string> t1 = splitstr(s);
+	
+    s = trim(s);
+    t = trim(t);
+    if(s.empty() || t.empty()) return 0;
+
+    vector<string> t1 = splitstr(s);
 	vector<string> t2 = splitstr(t);
-	int count = 0;
-	for(int i=0; i<t1.size() && i<t2.size() ; i++){
-		if(t1[i]==t2[i]) count++;
-		else return count;
-	} 
+	
+    int count = 0;
+    cout << t1.size() <<" " <<t2.size() <<endl;
+    for(int i=0; (i<t1.size() && i<t2.size()) ; i++){
+		cout << t1[i] << " " <<t2[i]<<endl;
+        if(t1[i]==t2[i]) {
+            cout<< "Inner Count: "<<count<<endl;
+            count++;}
+		else{ 
+            cout << "COUNT: "<<count << endl;
+            return count;
+        }
+    }
+    return count;
 }
 
 void
 Grammar::substr_token(string s,int front_tokens,string &front,string &back){
-	vector<string> t1 = splitstr(s);
+	cout <<"ft: "<< front_tokens<<endl;
+    vector<string> t1 = splitstr(s);
 	vector<string> s1(t1.begin(),t1.begin()+front_tokens);
 	vector<string> s2(t1.begin()+front_tokens,t1.end());
 
@@ -789,11 +811,12 @@ Grammar::leftFactor(){
 
 				int val = -1;
 				int j;
-				int count;
+				int count = 0;
 
 				for(j=i+1;j<prod.size();j++){
-					count = how_many_match(prod[j-1],prod[j]);
 					//cout << "Count: "<<count<<" " << prod[j-1]<< "    ->    " << prod[j] <<endl;
+					count = how_many_match(prod[j-1],prod[j]);
+					cout << "Count: "<<count<<" " << prod[j-1]<< "    ->    " << prod[j] <<endl;
 					if(count == 0) {
 						break;
 					}
