@@ -380,7 +380,8 @@ void Grammar::parse(string input){
     cout<< "Parsing Stack: " <<endl; 
     while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
 	    //cout << s.top() <<endl;
-	    printStack(s);
+	    cout << "Next Input Symbol: " << q.front()<<endl;
+        printStack(s);
         if(s.top() == q.front()){
 		    s.pop();
 		    q.pop();
@@ -421,6 +422,7 @@ void Grammar::parse(string input){
 
 void Grammar::makeParse(){
 	//set<string> first = firstOf();
+    bool ambig = false;
 	map<string,NonTerminal>::iterator it;
 	for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
 		NonTerminal &tmp = it->second;
@@ -446,6 +448,7 @@ void Grammar::makeParse(){
                                 "for "<<prod<<endl; 
                         cout << "Existing: " << tmp.parseTable[terminal] << endl;
                         //exit(EXIT_FAILURE);
+                        ambig = true;
                     }
                     tmp.parseTable[terminal] = prod;
 			    }
@@ -462,6 +465,7 @@ void Grammar::makeParse(){
                                 "for "<<prod<<endl; 
                         cout << "Existing: " << tmp.parseTable[*it_set] << endl;
                         //exit(EXIT_FAILURE);
+                        ambig = true;
                     }
 
                     tmp.parseTable[*it_set] = prod;
@@ -470,6 +474,7 @@ void Grammar::makeParse(){
 		}
 
 	}
+    if(ambig)
     exit(EXIT_FAILURE);
 }
 
