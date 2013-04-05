@@ -1,21 +1,22 @@
-%token x y c d EPS
-%start A
+%token + * int ( ) EPS
+%start E 
 %%
 
-A
-	: B x y
-	| x
+E
+	: T X
 	;
 
-B
-	: C D
+X
+	: + E
+	| EPS
 	;
 
-C
-	: A
-	| c
+Y
+	: * T
+    	| EPS
 	;
 
-D
-	: d
+T
+	: ( E )
+	| int Y
 	;
