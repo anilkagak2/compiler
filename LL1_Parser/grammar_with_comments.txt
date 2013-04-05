@@ -27,6 +27,7 @@ external_declaration
 | declaration
 ;
 
+// int foo( int bar ){ stmt }
 function_definition
 : type_specifiers declarator compound_statement
 ;
@@ -66,6 +67,9 @@ declaration_list
 | declaration_list declaration
 ;
 
+//do initializer if needed
+// TODO: int a = 5;
+// usage: int a;
 declaration
 : type_specifiers declarator ;
 ;
@@ -116,8 +120,7 @@ primary_expression
 
 
 multiplicative_expression
-: primary_expression
-| multiplicative_expression * primary_expression
+: multiplicative_expression * primary_expression
 | multiplicative_expression / primary__expression
 | multiplicative_expression % primary_expression
 ;
@@ -198,7 +201,8 @@ assignment_operator
 | |=
 ;
 
-type_specifiers
+// basic types
+type_specifier
 : VOID
 | CHAR
 | SHORT
@@ -209,3 +213,5 @@ type_specifiers
 | SIGNED
 | UNSIGNED
 ;
+
+

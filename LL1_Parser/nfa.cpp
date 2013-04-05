@@ -63,12 +63,14 @@ nfa::complex_to_base (string r) {
 		if (r[i] == '[') {
 			int pos = r.find_first_of (']', i+1);
 			if (pos != string::npos) {
-		 	    char st = r[++i]; cout << st << endl;
+		 	    char st = r[++i]; 
+                //cout << st << endl;
 			    if (r[++i] != '-') { 
 				cout << "should be used like [a-z]\n";
 				exit (EXIT_FAILURE);
 			    }
-			    char end = r[++i]; cout << end << endl;
+			    char end = r[++i];
+                //cout << end << endl;
 			    if (r[++i] != ']') {
 				cout << "Currently this range operator is not supported\n";
 				exit (EXIT_FAILURE);
@@ -84,7 +86,7 @@ nfa::complex_to_base (string r) {
 			}
 		} else ret += r[i];
 	}
-    cout << "compex to base " << ret << endl;
+    //cout << "compex to base " << ret << endl;
 	return ret;
 }
 
@@ -94,9 +96,9 @@ nfa::complex_to_base (string r) {
 void
 nfa::build_nfa (string regex) {
     regex = complex_to_base (regex);
-    cout << "regex after range operator decoding " << endl;
+    //cout << "regex after range operator decoding " << endl;
     string p = regex_to_postfix (regex);	// create postfix from regular expression
-    cout << "postfix is " << p << endl;
+    //cout << "postfix is " << p << endl;
     int n = p.length ();
     stack <nfa> st;
 
@@ -191,8 +193,8 @@ nfa::build_nfa (string regex) {
         a = n;             
     }
 
-    cout<<"final: "<<endl;
-    a.print_transitions ();
+    //cout<<"final: "<<endl;
+    //a.print_transitions ();
     *this = a;
 }
 
@@ -201,7 +203,7 @@ nfa::build_nfa (string regex) {
  */
 string
 nfa::insert_concate_op (string r) {
-    cout << "insert concat " << r << endl;
+    //cout << "insert concat " << r << endl;
 	if (r.length () == 1) return r;		// base case
 
 	string ct; ct=CONCATE;
@@ -242,7 +244,7 @@ nfa::insert_concate_op (string r) {
 		else if (pesc && !esc) {
 		if (r[i]=='(' ||
 		    (r[i] != '*' && r[i]!='|' && r[i]!=')' && r[i]!='(')) {
-            cout << "escapping " << r[i] << endl;
+            //cout << "escapping " << r[i] << endl;
             ret += ct + r[i];
         }
 		else ret += r[i];
@@ -252,17 +254,17 @@ nfa::insert_concate_op (string r) {
 		else if (!pesc && esc) {
 		if (p=='*' || p==')' ||
 		    (p != '*' && p!='|' && p!=')' && p!='(')) {
-            cout << "escapping " << r[i] << endl;
+            //cout << "escapping " << r[i] << endl;
             ret += ct + '\\' + r[i];
         }
 		else {
-            cout << "ascii is "<<'\\'+r[i] << endl;
+            //cout << "ascii is "<<'\\'+r[i] << endl;
             ret += '\\';  ret += r[i];
         }
 		}
 
 		else {
-            cout << "escapping " << r[i] << endl;
+            //cout << "escapping " << r[i] << endl;
 			ret += ct + '\\' + r[i];
 		}
 		p = r[i];
@@ -278,7 +280,7 @@ nfa::insert_concate_op (string r) {
 string
 nfa::regex_to_postfix (string r) {
 	r = insert_concate_op (r);
-	cout << "concate operator inserted: " << r << endl;
+	//cout << "concate operator inserted: " << r << endl;
 	int n = r.length ();
 	string postfix = "";
 	stack<char> st;
@@ -292,7 +294,7 @@ nfa::regex_to_postfix (string r) {
 					char op = st.top ();
 					while (op != '(' && !st.empty ()) {
 						postfix += op;
-						cout << "postfix " << postfix << endl;
+						//cout << "postfix " << postfix << endl;
 						st.pop ();
 						op = st.top ();
 					}

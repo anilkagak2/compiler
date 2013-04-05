@@ -52,7 +52,7 @@ dfa::dfa (int num_states, set<char>alphabet,vector<vector<int> >	transitions,vec
 	this->transitions = transitions;	
    
     calculate_reject();
-    print_rejecting();
+    //print_rejecting();
 }
 
 

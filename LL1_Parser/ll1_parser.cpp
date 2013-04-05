@@ -235,7 +235,7 @@ Grammar::populateFollow () {
 			// 1 to n-1, although it'll go till n but the nth first will be empty
 			//TODO: Farzi Error
             for (int k=0; k<(tokens.size ()-1); k++) {
-			    cout << "token: "<<tokens.size() <<endl;
+			    //cout << "token: "<<tokens.size() <<endl;
                 if(tokens.empty()) break;
                 nt = tokens[k];
                 		if (isNonTerminal (nt)) {
@@ -359,6 +359,14 @@ Grammar::firstOf (string production) {
 	return first;
 }
 
+void printStack( stack<string> s){
+    while(!s.empty()){
+        cout << s.top() <<endl;
+        s.pop();
+    }
+    cout << " ---------------------------------------------------"<<endl;
+}
+
 //Tokenised, space separated input is assumed
 //eg: Id plus whitespace etc
 void Grammar::parse(string input){
@@ -371,8 +379,9 @@ void Grammar::parse(string input){
     s.push(start);
     cout<< "Parsing Stack: " <<endl; 
     while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
-	    cout << s.top() <<endl;
-	    if(s.top() == q.front()){
+	    //cout << s.top() <<endl;
+	    printStack(s);
+        if(s.top() == q.front()){
 		    s.pop();
 		    q.pop();
 	    } 
@@ -384,7 +393,7 @@ void Grammar::parse(string input){
 
 		    if(nonTerminals[s.top ()].parseTable.find(q.front()) == nonTerminals[s.top()].parseTable.end()){
 
-			    printf("Terminal not found for nonTerminal: %s %s\n",q.front().c_str(),s.top ().c_str ());
+			    printf("Terminal: %s not found for nonTerminal: %s \n",q.front().c_str(),s.top ().c_str ());
 			    return;
 		    }
 
@@ -430,19 +439,38 @@ void Grammar::makeParse(){
 					eps_in = true;
 				}
 				else
-					tmp.parseTable[terminal] = prod;
-			}
+                {
+                    if(tmp.parseTable.find(terminal) != tmp.parseTable.end()){
+                        cout << " ERROR :"<< __LINE__ <<":" << __func__ << ":  Grammar is ambiguous "<<endl;
+                        cout << it->first << " already has a rule for this terminal:  "<<terminal<<
+                                "for "<<prod<<endl; 
+                        cout << "Existing: " << tmp.parseTable[terminal] << endl;
+                        //exit(EXIT_FAILURE);
+                    }
+                    tmp.parseTable[terminal] = prod;
+			    }
+            }
 
 			if(eps_in){ // also calculate from follow set
 				set<string> follow = tmp.followSet;
 				for(it_set = follow.begin(); it_set != follow.end() ; it_set++){
 					//string terminal = *it_set;   
-					tmp.parseTable[*it_set] = prod;
+				
+                    if(tmp.parseTable.find(*it_set) != tmp.parseTable.end()){
+                        cout << " ERROR :"<< __LINE__ <<":" << __func__ << ":  Grammar is ambiguous "<<endl;
+                        cout << it->first << " already has a rule for this terminal:  "<<*it_set<< 
+                                "for "<<prod<<endl; 
+                        cout << "Existing: " << tmp.parseTable[*it_set] << endl;
+                        //exit(EXIT_FAILURE);
+                    }
+
+                    tmp.parseTable[*it_set] = prod;
 				}
 			}
 		}
 
 	}
+    exit(EXIT_FAILURE);
 }
 
 void Grammar::calcNullable(){
@@ -765,14 +793,14 @@ int how_many_match(string s,string t){
 	vector<string> t2 = splitstr(t);
 	
     int count = 0;
-    cout << t1.size() <<" " <<t2.size() <<endl;
+    //cout << t1.size() <<" " <<t2.size() <<endl;
     for(int i=0; (i<t1.size() && i<t2.size()) ; i++){
 		cout << t1[i] << " " <<t2[i]<<endl;
         if(t1[i]==t2[i]) {
-            cout<< "Inner Count: "<<count<<endl;
+      //      cout<< "Inner Count: "<<count<<endl;
             count++;}
 		else{ 
-            cout << "COUNT: "<<count << endl;
+        //    cout << "COUNT: "<<count << endl;
             return count;
         }
     }
@@ -781,7 +809,7 @@ int how_many_match(string s,string t){
 
 void
 Grammar::substr_token(string s,int front_tokens,string &front,string &back){
-	cout <<"ft: "<< front_tokens<<endl;
+	//cout <<"ft: "<< front_tokens<<endl;
     vector<string> t1 = splitstr(s);
 	vector<string> s1(t1.begin(),t1.begin()+front_tokens);
 	vector<string> s2(t1.begin()+front_tokens,t1.end());
@@ -816,7 +844,7 @@ Grammar::leftFactor(){
 				for(j=i+1;j<prod.size();j++){
 					//cout << "Count: "<<count<<" " << prod[j-1]<< "    ->    " << prod[j] <<endl;
 					count = how_many_match(prod[j-1],prod[j]);
-					cout << "Count: "<<count<<" " << prod[j-1]<< "    ->    " << prod[j] <<endl;
+				//	cout << "Count: "<<count<<" " << prod[j-1]<< "    ->    " << prod[j] <<endl;
 					if(count == 0) {
 						break;
 					}

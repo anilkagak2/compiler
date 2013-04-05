@@ -116,8 +116,7 @@ primary_expression
 
 
 multiplicative_expression
-: primary_expression
-| multiplicative_expression * primary_expression
+: multiplicative_expression * primary_expression
 | multiplicative_expression / primary__expression
 | multiplicative_expression % primary_expression
 ;
@@ -198,7 +197,7 @@ assignment_operator
 | |=
 ;
 
-type_specifiers
+type_specifier
 : VOID
 | CHAR
 | SHORT

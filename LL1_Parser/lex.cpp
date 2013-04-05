@@ -70,9 +70,9 @@ void lex() {
 		regex_buf = sanitize(regex_buf);
 		regex.push_back(regex_buf);
 
-		cout<< "class: " << token_class_buf
-			<< " regex: " << regex_buf ;
-		cout <<" DONE" << endl;
+		//cout<< "class: " << token_class_buf
+		//	<< " regex: " << regex_buf ;
+		//cout <<" DONE" << endl;
 	}
 	//    exit(EXIT_FAILURE);
 
@@ -81,9 +81,9 @@ void lex() {
 	for(int i=0 ; i< regex.size(); i++){
 		nfa n(regex[i]);
 		dfas.push_back(n.to_dfa());    
-		dfas[i].print_transitions ();
-		dfas[i].print_final();
-		cout<<endl;
+		//dfas[i].print_transitions ();
+		//dfas[i].print_final();
+		//cout<<endl;
 	}
 
 /*	cout<<" Write the index of the regex corresponding to Identifiers class (0 based index) : "<<endl;
@@ -160,7 +160,7 @@ void lex() {
 		symbol_table[accepting_dfa].push_back(output);
 		//string output(input[current],input[current+max_advance]);
 		//cout << "< "<<token_class[accepting_dfa] <<" , "<<output<<" >" << endl;
-		cout<<output<<endl;
+	//	cout<<output<<endl;
 		if(output != "\n" && output != "\t" && output != " ") 
 		of <<token_class[accepting_dfa]<< endl;
 
