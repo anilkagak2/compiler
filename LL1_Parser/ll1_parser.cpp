@@ -367,33 +367,44 @@ void Grammar::parse(string input){
 	s.push(dollar);
     s.push(start);
     cout<< "Parsing Stack: " <<endl; 
-	while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
-        cout << s.top() <<endl;
-        if(s.top() == q.front()){
-			s.pop();
-			q.pop();
-		} 
-		else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
-			if(!isTerminal(q.front())){
+    while( !(s.empty() && q.empty()) ){ // Terminals matched and removed
+	    cout << s.top() <<endl;
+	    if(s.top() == q.front()){
+		    s.pop();
+		    q.pop();
+	    } 
+	    else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
+		    if(!isTerminal(q.front())){
 			    printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
 			    return;
-            }
-            string prod = nonTerminals[s.top ()].parseTable[q.front()];
-			stack<string> stk = splitstr_stack(prod);
+		    }
 
-			s.pop();
-			if(stk.top() != EPSILON){ // if prod is epsilon, then just pop
-				while(!stk.empty()){
-					s.push(stk.top());
-					stk.pop();
-				}
-			}
-		}
-		else{ // error
-			printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
-			return;
-		}
-	}
+		    if(nonTerminals[s.top ()].parseTable.find(q.front()) == nonTerminals[s.top()].parseTable.end()){
+
+			    printf("Terminal not found for nonTerminal: %s %s\n",q.front().c_str(),s.top ().c_str ());
+			    return;
+		    }
+
+		    string prod = nonTerminals[s.top ()].parseTable[q.front()];
+		    stack<string> stk = splitstr_stack(prod);
+
+		    s.pop();
+		    if(stk.empty()){
+			    printf("Empty production in grammer is not allowed: %s\n",q.front ().c_str ());
+			    return;
+		    }
+		    if(stk.top() != EPSILON){ // if prod is epsilon, then just pop
+			    while(!stk.empty()){
+				    s.push(stk.top());
+				    stk.pop();
+			    }
+		    }
+	    }
+	    else{ // error
+		    printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
+		    return;
+	    }
+    }
 }
 
 void Grammar::makeParse(){
@@ -401,22 +412,22 @@ void Grammar::makeParse(){
 	map<string,NonTerminal>::iterator it;
 	for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
 		NonTerminal &tmp = it->second;
-        //single nontreminal
+		//single nontreminal
 		for(int i=0;i<tmp.productions.size();i++){
 			string prod = tmp.productions[i];
-            //cout << "parse table: prod:  "<<prod <<endl;
+			//cout << "parse table: prod:  "<<prod <<endl;
 			set<string> first = firstOf(prod);
 			set<string>::iterator it_set;
 			bool eps_in = false;
 			for(it_set = first.begin(); it_set != first.end() ; it_set++){
 				string terminal = *it_set;
-                //cout << "parse table: terminal:  "<<terminal <<endl;
+				//cout << "parse table: terminal:  "<<terminal <<endl;
 				//if epsilon
 				if(terminal == EPSILON){
 					eps_in = true;
 				}
-                else
-				tmp.parseTable[terminal] = prod;
+				else
+					tmp.parseTable[terminal] = prod;
 			}
 
 			if(eps_in){ // also calculate from follow set
@@ -432,143 +443,143 @@ void Grammar::makeParse(){
 }
 
 void Grammar::calcNullable(){
-		bool change = false;
-		while(1){
-				if(change){
-						change = false;
-				}
-				else break;
-
-				map<string,NonTerminal>::iterator it;
-				for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
-						NonTerminal tmp = it->second;
-						if(tmp.nullable)
-								continue;
-
-						bool non_terminal_nullable = false;
-
-						//single nontreminal
-						for(int i=0;i<tmp.productions.size();i++){
-								vector<string> v = splitstr(tmp.productions[i]);
-								bool all_nullable = true;
-
-								//single production, if any one of the production is all_nullable, the nonTerminal is nullable
-								for(int j=0;j<v.size();j++){
-										if(nonTerminals.find(v[j])!=nonTerminals.end()){
-												if(!nonTerminals[v[j]].nullable){
-														all_nullable = false;
-														break;
-												}
-										} 
-										else{
-												all_nullable = false;
-												break;
-										}
-								}
-
-								if(all_nullable){
-										non_terminal_nullable = true;
-										break;
-								}
-						}
-
-						if(non_terminal_nullable){
-								tmp.nullable = true;
-								change = true;
-						}
-
-				}
+	bool change = false;
+	while(1){
+		if(change){
+			change = false;
 		}
+		else break;
+
+		map<string,NonTerminal>::iterator it;
+		for(it=nonTerminals.begin(); it != nonTerminals.end() ; it++){
+			NonTerminal tmp = it->second;
+			if(tmp.nullable)
+				continue;
+
+			bool non_terminal_nullable = false;
+
+			//single nontreminal
+			for(int i=0;i<tmp.productions.size();i++){
+				vector<string> v = splitstr(tmp.productions[i]);
+				bool all_nullable = true;
+
+				//single production, if any one of the production is all_nullable, the nonTerminal is nullable
+				for(int j=0;j<v.size();j++){
+					if(nonTerminals.find(v[j])!=nonTerminals.end()){
+						if(!nonTerminals[v[j]].nullable){
+							all_nullable = false;
+							break;
+						}
+					} 
+					else{
+						all_nullable = false;
+						break;
+					}
+				}
+
+				if(all_nullable){
+					non_terminal_nullable = true;
+					break;
+				}
+			}
+
+			if(non_terminal_nullable){
+				tmp.nullable = true;
+				change = true;
+			}
+
+		}
+	}
 }
 
 Grammar::Grammar(string fileName){
-		string data;
-		ifstream file(fileName.c_str(),ifstream::in);
-		if(!file.is_open()){
-				cout << "Error Opening file";
+	string data;
+	ifstream file(fileName.c_str(),ifstream::in);
+	if(!file.is_open()){
+		cout << "Error Opening file";
+		exit(EXIT_FAILURE);
+	}
+
+	getline(file,data);
+	while(!file.eof() && data != "%%"){
+		if(!file.eof() && data != "%%" && data != ""){
+			if(data[0] != '%'){
+				cout << "Error in Syntex of Grammar\n";
 				exit(EXIT_FAILURE);
-		}
+			}
 
+			vector<string> all_token = splitstr(data);
+			/*
+			   %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+			   %start translation_unit
+			 */
+
+			if(all_token[0] == "%token"){
+				if(all_token.size() > 1)
+					terminals.insert(all_token.begin()+1,all_token.end());
+			}
+			else if(all_token[0] == "%start"){
+				if(all_token.size() > 1)
+					start = all_token[1];
+			}
+			//			cout << " Terminals " << data << endl;
+		}
 		getline(file,data);
-		while(!file.eof() && data != "%%"){
-			if(!file.eof() && data != "%%" && data != ""){
-				if(data[0] != '%'){
-						cout << "Error in Syntex of Grammar\n";
-							exit(EXIT_FAILURE);
-						}
+	}
+	while(!file.eof() ){
+		getline(file,data);
+		data = trim(data);
+		if(data == "")
+			continue;
+		NonTerminal nt;
+		set<string> tmp;
+		nt.nullable = false;
+		string nonTerminalName = "";
 
-						vector<string> all_token = splitstr(data);
-						/*
-						   %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
-						   %start translation_unit
-						 */
-
-						if(all_token[0] == "%token"){
-								if(all_token.size() > 1)
-										terminals.insert(all_token.begin()+1,all_token.end());
-						}
-						else if(all_token[0] == "%start"){
-								if(all_token.size() > 1)
-										start = all_token[1];
-						}
-						//			cout << " Terminals " << data << endl;
+		while(!file.eof() && data != ";"){
+			if(!file.eof() && data != ";" && data != "") {
+				if(data[0] != ':' && data[0] != '|'){
+					nonTerminalName = data;
+					//If non terminal in not in map
+					if(isNonTerminal(nonTerminalName)){
+						nt = nonTerminals[nonTerminalName];
+					}
+					//					cout <<"Token : "<< data<<endl ;
 				}
-				getline(file,data);
+				else{
+					// Rules are of the form
+					// \t: primary_expression
+					data = data.substr(1);
+					data = trim(data);
+					if(data == ""){
+						cout << "Error : empty productions\n";
+						exit(EXIT_FAILURE);
+					}
+					tmp.insert(data);
+					if(data == EPSILON)
+						nt.nullable = true;
+
+					//					cout <<"Rules :" << data << endl;
+				}
+			}
+			getline(file,data);
+			data = trim(data);
 		}
-		while(!file.eof() ){
-				getline(file,data);
-				data = trim(data);
-				if(data == "")
-					continue;
-				NonTerminal nt;
-				set<string> tmp;
-				nt.nullable = false;
-				string nonTerminalName = "";
-
-				while(!file.eof() && data != ";"){
-						if(!file.eof() && data != ";" && data != "") {
-								if(data[0] != ':' && data[0] != '|'){
-										nonTerminalName = data;
-										//If non terminal in not in map
-										if(isNonTerminal(nonTerminalName)){
-												nt = nonTerminals[nonTerminalName];
-										}
-										//					cout <<"Token : "<< data<<endl ;
-								}
-								else{
-										// Rules are of the form
-										// \t: primary_expression
-										data = data.substr(1);
-										data = trim(data);
-										if(data == ""){
-											cout << "Error : empty productions\n";
-											exit(EXIT_FAILURE);
-										}
-										tmp.insert(data);
-										if(data == EPSILON)
-											nt.nullable = true;
-
-										//					cout <<"Rules :" << data << endl;
-								}
-						}
-						getline(file,data);
-						data = trim(data);
-				}
-				if(!file.eof()){
-					nt.productions.insert(nt.productions.begin(),tmp.begin(),tmp.end());	
-					nonTerminals[nonTerminalName] = nt;
-					
-				}
+		if(!file.eof()){
+			nt.productions.insert(nt.productions.begin(),tmp.begin(),tmp.end());	
+			nonTerminals[nonTerminalName] = nt;
 
 		}
 
-        printTerminals();
+	}
+
+	printTerminals();
 
 	cout << "Before removing left recursion " <<  endl;
 	printProductions ();
 	removeIndirectLeftRecursion ();
-	
-    cout << "After removing left recursion " <<  endl;
+
+	cout << "After removing left recursion " <<  endl;
 	printProductions ();
 	calcNullable ();
 	populateFirst();
@@ -594,37 +605,37 @@ Grammar::Grammar(string fileName){
  */
 
 void Grammar::populateFirst(){
-		map<string, NonTerminal>::iterator it;
-		vector<string>::iterator vit;
-		bool isChanged = true;
-		while(isChanged){
-				//cout << "In populateFirst"<< endl;
-				isChanged = false;
-				for (it=nonTerminals.begin(); it!=nonTerminals.end(); ++it){
-						NonTerminal &nt = it->second;
-						//For each production
-						for(vit=nt.productions.begin();vit!=nt.productions.end();vit++){
-								vector<string> alphabet = splitstr(*vit);
-								if(addFirst(nt,alphabet[0]))
-										isChanged = true;
+	map<string, NonTerminal>::iterator it;
+	vector<string>::iterator vit;
+	bool isChanged = true;
+	while(isChanged){
+		//cout << "In populateFirst"<< endl;
+		isChanged = false;
+		for (it=nonTerminals.begin(); it!=nonTerminals.end(); ++it){
+			NonTerminal &nt = it->second;
+			//For each production
+			for(vit=nt.productions.begin();vit!=nt.productions.end();vit++){
+				vector<string> alphabet = splitstr(*vit);
+				if(addFirst(nt,alphabet[0]))
+					isChanged = true;
 
-								for(int i=1;i<alphabet.size();i++){
-										string sub_prod = "";
-										for(int j=0;j<i;j++){
-											sub_prod += alphabet[j];
-											sub_prod += ' ';	
-										}
-										//cout <<" sub_prod : " <<sub_prod <<endl;
-										if(nullable(sub_prod)){
-											//cout << "Nullable : " <<sub_prod << endl;
-												if(addFirst(nt,alphabet[i]))
-														isChanged = true;
-										}
-								}
-						}
-
+				for(int i=1;i<alphabet.size();i++){
+					string sub_prod = "";
+					for(int j=0;j<i;j++){
+						sub_prod += alphabet[j];
+						sub_prod += ' ';	
+					}
+					//cout <<" sub_prod : " <<sub_prod <<endl;
+					if(nullable(sub_prod)){
+						//cout << "Nullable : " <<sub_prod << endl;
+						if(addFirst(nt,alphabet[i]))
+							isChanged = true;
+					}
 				}
+			}
+
 		}
+	}
 }
 
 /*
@@ -634,202 +645,202 @@ void Grammar::populateFirst(){
  */ 
 bool
 Grammar::addFirst(NonTerminal &nt,string str){
-		if(isNonTerminal(str)){
-				if( includes (nt.firstSet.begin (), nt.firstSet.end (), 
-										nonTerminals[str].firstSet.begin (), nonTerminals[str].firstSet.end () ) )
-						return false;
-				set<string> first = nonTerminals[str].firstSet;
-				nt.firstSet.insert(first.begin (), first.end ());
-		}
-		else if (isTerminal(str)){
-				if(nt.firstSet.find(str) != nt.firstSet.end())
-						return false;
-				nt.firstSet.insert(str);
-		}else{
-				cout << "Cannot identify the string : "<<str<<endl;
-				exit(EXIT_FAILURE);	
-		}
-		return true;
+	if(isNonTerminal(str)){
+		if( includes (nt.firstSet.begin (), nt.firstSet.end (), 
+					nonTerminals[str].firstSet.begin (), nonTerminals[str].firstSet.end () ) )
+			return false;
+		set<string> first = nonTerminals[str].firstSet;
+		nt.firstSet.insert(first.begin (), first.end ());
+	}
+	else if (isTerminal(str)){
+		if(nt.firstSet.find(str) != nt.firstSet.end())
+			return false;
+		nt.firstSet.insert(str);
+	}else{
+		cout << "Cannot identify the string : "<<str<<endl;
+		exit(EXIT_FAILURE);	
+	}
+	return true;
 }
 
 void Grammar::printProductions () {
-		map<string,NonTerminal>::iterator it;
-		//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
-		cout << "Productions : "<<endl;
-		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-				cout << it->first << " - >" << endl;
-				vector<string> p = it->second.productions;
-				for (int i=0; i<p.size (); i++) 
-					cout << p[i] << endl;
+	map<string,NonTerminal>::iterator it;
+	//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
+	cout << "Productions : "<<endl;
+	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+		cout << it->first << " - >" << endl;
+		vector<string> p = it->second.productions;
+		for (int i=0; i<p.size (); i++) 
+			cout << p[i] << endl;
 
-			cout << endl;
-		}
+		cout << endl;
+	}
 }
 
 void Grammar::printNonTerminals(){
-		map<string,NonTerminal>::iterator it;
-		//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
-		cout << "Grammer : ";
-		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-				cout << "NT "<<it->first << " " << endl;
-		        vector<string> prod = (it->second).productions;
-                for(int i=0;i<prod.size();i++)
-                    cout<< prod[i] <<"      ";
-                cout<<endl;
-        }
+	map<string,NonTerminal>::iterator it;
+	//cout << "size in nonterm of non ter " << nonTerminals.size () << endl;
+	cout << "Grammer : ";
+	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+		cout << "NT "<<it->first << " " << endl;
+		vector<string> prod = (it->second).productions;
+		for(int i=0;i<prod.size();i++)
+			cout<< prod[i] <<"      ";
+		cout<<endl;
+	}
 }
 
 void Grammar::printTerminals(){
-		set<string>::iterator it;
-		cout << "Terminals : ";
-		for ( it = terminals.begin() ; it != terminals.end() ; it++){
-				cout << *it << ' ';
-		}
-		cout << endl;
+	set<string>::iterator it;
+	cout << "Terminals : ";
+	for ( it = terminals.begin() ; it != terminals.end() ; it++){
+		cout << *it << ' ';
+	}
+	cout << endl;
 }
 
 void Grammar::printFirstSet(){
-		map<string,NonTerminal>::iterator it;
-		//cout << "size in first of non ter " << nonTerminals.size () << endl;
-		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-				cout << it->first <<endl;
-				set<string> first_set = (it->second).firstSet;
-				set<string>::iterator it_set;
-				cout << "First Set : ";
-				for ( it_set = first_set.begin() ; it_set != first_set.end() ; it_set++){
-						cout << *it_set << ' ';
-				}
-				cout << endl;
-
+	map<string,NonTerminal>::iterator it;
+	//cout << "size in first of non ter " << nonTerminals.size () << endl;
+	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+		cout << it->first <<endl;
+		set<string> first_set = (it->second).firstSet;
+		set<string>::iterator it_set;
+		cout << "First Set : ";
+		for ( it_set = first_set.begin() ; it_set != first_set.end() ; it_set++){
+			cout << *it_set << ' ';
 		}
+		cout << endl;
+
+	}
 }
 
 void Grammar::printFollowSet(){
-		map<string,NonTerminal>::iterator it;
-		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-				cout << it->first <<endl;
-				set<string> fset = (it->second).followSet;
-				set<string>::iterator it_set;
-				cout << "Follow Set : ";
-				for ( it_set = fset.begin() ; it_set != fset.end() ; it_set++){
-						cout << *it_set << ' ';
-				}
-				cout << endl;
-
+	map<string,NonTerminal>::iterator it;
+	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+		cout << it->first <<endl;
+		set<string> fset = (it->second).followSet;
+		set<string>::iterator it_set;
+		cout << "Follow Set : ";
+		for ( it_set = fset.begin() ; it_set != fset.end() ; it_set++){
+			cout << *it_set << ' ';
 		}
+		cout << endl;
+
+	}
 }
 
 void Grammar::printParseTable(){
-		map<string,NonTerminal>::iterator it;
-		for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
-				cout << it->first <<endl;
-				map<string,string> pt = (it->second).parseTable;
-				map<string,string>::iterator it_mp;
-				cout << "Parse Table : " <<endl;
-				for ( it_mp = pt.begin() ; it_mp != pt.end() ; it_mp++){
-						cout << it_mp->first << " : " <<it_mp->second << endl;
-				}
-				cout << endl;
-
+	map<string,NonTerminal>::iterator it;
+	for(it=nonTerminals.begin() ; it!= nonTerminals.end() ; it++){
+		cout << it->first <<endl;
+		map<string,string> pt = (it->second).parseTable;
+		map<string,string>::iterator it_mp;
+		cout << "Parse Table : " <<endl;
+		for ( it_mp = pt.begin() ; it_mp != pt.end() ; it_mp++){
+			cout << it_mp->first << " : " <<it_mp->second << endl;
 		}
+		cout << endl;
+
+	}
 }
 
 int how_many_match(string s,string t){
-    vector<string> t1 = splitstr(s);
-    vector<string> t2 = splitstr(t);
-    int count = 0;
-    for(int i=0; i<t1.size() && i<t2.size() ; i++){
-        if(t1[i]==t2[i]) count++;
-        else return count;
-    } 
+	vector<string> t1 = splitstr(s);
+	vector<string> t2 = splitstr(t);
+	int count = 0;
+	for(int i=0; i<t1.size() && i<t2.size() ; i++){
+		if(t1[i]==t2[i]) count++;
+		else return count;
+	} 
 }
 
 void
 Grammar::substr_token(string s,int front_tokens,string &front,string &back){
-    vector<string> t1 = splitstr(s);
-    vector<string> s1(t1.begin(),t1.begin()+front_tokens);
-    vector<string> s2(t1.begin()+front_tokens,t1.end());
-    
-    for(int i=0;i<s1.size();i++) front += s1[i] + " ";
-    for(int i=0;i<s2.size();i++) back += s2[i] + " ";
-    
-    front = trim(front);
-    back = trim(back);
+	vector<string> t1 = splitstr(s);
+	vector<string> s1(t1.begin(),t1.begin()+front_tokens);
+	vector<string> s2(t1.begin()+front_tokens,t1.end());
+
+	for(int i=0;i<s1.size();i++) front += s1[i] + " ";
+	for(int i=0;i<s2.size();i++) back += s2[i] + " ";
+
+	front = trim(front);
+	back = trim(back);
 }
 
 void
 Grammar::leftFactor(){
-    map<string,NonTerminal> total_nt_map = nonTerminals;
-    map<string,NonTerminal> new_nt_map;
+	map<string,NonTerminal> total_nt_map = nonTerminals;
+	map<string,NonTerminal> new_nt_map;
 
-    cout<<"left Factor"<<endl;
-    while(1){
-    
-        map<string,NonTerminal>::iterator it;
-	    for(it=total_nt_map.begin() ; it!= total_nt_map.end() ; it++){
-		    NonTerminal nt = it->second;
-            vector<string> prod = nt.productions;
-            vector<string> new_prod;
-            sort(prod.begin(),prod.end());
-            for(int i=0; i < prod.size();){
-                
-                int val = -1;
-                int j;
-                int count;
+	cout<<"left Factor"<<endl;
+	while(1){
 
-                for(j=i+1;j<prod.size();j++){
-                    count = how_many_match(prod[j-1],prod[j]);
-                    if(count == 0) {
-                        break;
-                    }
-                    else if(val == -1) val = count;
-                    else { // to check for more then a pair
-                        if(count < val) break;
-                    }
-                } 
-              
-                if(j-i == 1){ // unique production, continue 
-                    new_prod.push_back(prod[i]);
-                }
-                // j is the first non matched index with i (j may also exceed size of prod)
-                if( j-i > 1 ){ // something matched
-                            
-                    //1. Remove all common prod
-                    //2. Add new prod 'common __NT_i'
-                    //3. Add one NT as '__NT_i'
-                    //4. Add new prods in new NT
-                   
-                    string front,back;
-                    substr_token(prod[i],count,front,back);
-                    string new_nt_name = generateName(it->first);
-                
-                    // 2    
-                    new_prod.push_back(front+" "+new_nt_name);
-                
-                    NonTerminal new_nt;
-                    // 1 & 4
-                    for(int k=i;k<j;k++){ // Make new NT and change the current productions
-                        string start,end;
-                        substr_token(prod[k],count,start,end);
-                        //new_nt.addProductions(end);
-                        new_nt.productions.push_back(end);
-                    }
-                
-                    // 3
-                    new_nt_map[new_nt_name] = new_nt;
-                }
-                i = j;
-            }
+		map<string,NonTerminal>::iterator it;
+		for(it=total_nt_map.begin() ; it!= total_nt_map.end() ; it++){
+			NonTerminal nt = it->second;
+			vector<string> prod = nt.productions;
+			vector<string> new_prod;
+			sort(prod.begin(),prod.end());
+			for(int i=0; i < prod.size();){
 
-            (it->second).productions = new_prod;
-        }
-   
-        // Break Condition
-        if(new_nt_map.empty())break;
-        else{ // TODO: add new_nt_map to total_nt_map
-           total_nt_map.insert(new_nt_map.begin(),new_nt_map.end());
-           new_nt_map.clear();
-        }
-    }
-    nonTerminals = total_nt_map;
+				int val = -1;
+				int j;
+				int count;
+
+				for(j=i+1;j<prod.size();j++){
+					count = how_many_match(prod[j-1],prod[j]);
+					if(count == 0) {
+						break;
+					}
+					else if(val == -1) val = count;
+					else { // to check for more then a pair
+						if(count < val) break;
+					}
+				} 
+
+				if(j-i == 1){ // unique production, continue 
+					new_prod.push_back(prod[i]);
+				}
+				// j is the first non matched index with i (j may also exceed size of prod)
+				if( j-i > 1 ){ // something matched
+
+					//1. Remove all common prod
+					//2. Add new prod 'common __NT_i'
+					//3. Add one NT as '__NT_i'
+					//4. Add new prods in new NT
+
+					string front,back;
+					substr_token(prod[i],count,front,back);
+					string new_nt_name = generateName(it->first);
+
+					// 2    
+					new_prod.push_back(front+" "+new_nt_name);
+
+					NonTerminal new_nt;
+					// 1 & 4
+					for(int k=i;k<j;k++){ // Make new NT and change the current productions
+						string start,end;
+						substr_token(prod[k],count,start,end);
+						//new_nt.addProductions(end);
+						new_nt.productions.push_back(end);
+					}
+
+					// 3
+					new_nt_map[new_nt_name] = new_nt;
+				}
+				i = j;
+			}
+
+			(it->second).productions = new_prod;
+		}
+
+		// Break Condition
+		if(new_nt_map.empty())break;
+		else{ // TODO: add new_nt_map to total_nt_map
+			total_nt_map.insert(new_nt_map.begin(),new_nt_map.end());
+			new_nt_map.clear();
+		}
+	}
+	nonTerminals = total_nt_map;
 }

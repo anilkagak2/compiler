@@ -1,22 +1,18 @@
-%token + * int ( ) EPS
+%token + * id ( ) EPS
 %start E 
 %%
 
 E
-	: T X
-	;
-
-X
-	: + E
-	| EPS
-	;
-
-Y
-	: * T
-    	| EPS
+	: E + T
+	| T
 	;
 
 T
+	: T F
+	| EPS
+	;
+
+F
 	: ( E )
-	| int Y
+	| id
 	;
