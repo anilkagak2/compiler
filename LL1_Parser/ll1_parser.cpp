@@ -125,7 +125,6 @@ Grammar::removeDirectLeftRecursion (string nt, vector<string> &p, vector<NonTerm
 	NT.productions.push_back (EPSILON);
 	NT.nullable = true;
 
-//	nonTerminals[newnt] = NT;
 	vnewnt.push_back (NT);
 	snewnt.push_back (newnt);
 }
@@ -145,18 +144,28 @@ Grammar::removeIndirectLeftRecursion () {
 	cout << "Removing indirect left recusion " << endl;
 
 	for (int i=0; i<vnt.size (); i++) {
+#ifdef _DEBUG_
 		cout << "NT " << snt[i] << endl;
+#endif
 		vector<string> &productions = vnt[i].productions;
 		for (int j=0; j<i; j++) {
+		//for (int j=0; j<vnt.size (); j++) {
+
+#ifdef _DEBUG_
 			cout << "\t searching for " << snt[j] << endl;
+#endif
 			for (int k=0; k<productions.size (); k++) {
 				vector<string> to_add;
 
+#ifdef _DEBUG_
 				cout << "in production " << productions[k] << endl;
+#endif
 				string nt = snt[j];
 				vector<string> tokens = splitstr (productions[k]);
 				if (tokens.size ()>0 && (tokens[0] == nt)) {
+#ifdef _DEBUG_
 					cout << "it in production " << productions[k] << endl;
+#endif
 					string left_token = productions[k].substr (nt.length ());
 					vector<string> &from = vnt[j].productions;
 					// replace the ith by the 1st rule here & place the remaining at the end instead of erasing this element
@@ -176,14 +185,17 @@ Grammar::removeIndirectLeftRecursion () {
 		removeDirectLeftRecursion (snt[i], vnt[i].productions, vnewnt, snewnt);
 	}
 
-	cout << "Start of new non terminals " << endl;
-	for (int i=0; i<vnewnt.size (); i++) {
-		cout << snewnt[i] << "-->" << endl;
-		for (int j=0; j<vnewnt[i].productions.size (); j++) 
-		cout << vnewnt[i].productions[j] << endl;
+	if (vnewnt.size () > 0) {
+		cout << "Start of new non terminals " << endl;
+		for (int i=0; i<vnewnt.size (); i++) {
+			cout << snewnt[i] << "-->" << endl;
+			for (int j=0; j<vnewnt[i].productions.size (); j++) 
+			cout << vnewnt[i].productions[j] << endl;
+			cout << endl;
+		}
+		cout << "End of new non terminals " << endl;
 		cout << endl;
 	}
-	cout << "End of new non terminals " << endl;
 
 	vnt.insert (vnt.end (), vnewnt.begin (), vnewnt.end ());
 	snt.insert (snt.end (), snewnt.begin (), snewnt.end ());
@@ -210,7 +222,7 @@ Grammar::populateFollow () {
 
 	map<string, NonTerminal>::iterator it;
 	while (1) {
-        cout<<"In While" <<endl;
+        //cout<<"In While" <<endl;
 	bool change = false;
 	for (it=nonTerminals.begin (); it!=nonTerminals.end (); it++) {
 		vector<string> P = it->second.productions;
