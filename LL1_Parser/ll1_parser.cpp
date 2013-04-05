@@ -60,7 +60,7 @@ stack <string> splitstr_stack(string message){
 string
 Grammar::generateName (string nt) {
 	static int number = 0;
-	string newName = "__"+nt+numToString (number)+"__";
+	string newName = "__"+nt+numToString (number++)+"__";
 	return newName;
 }
 
@@ -581,6 +581,9 @@ Grammar::Grammar(string fileName){
 
 	cout << "After removing left recursion " <<  endl;
 	printProductions ();
+	leftFactor();
+	cout << "After removing left Factoring " <<  endl;
+	printProductions ();
 	calcNullable ();
 	populateFirst();
 	populateFollow();
@@ -790,12 +793,15 @@ Grammar::leftFactor(){
 
 				for(j=i+1;j<prod.size();j++){
 					count = how_many_match(prod[j-1],prod[j]);
+					cout << "Count: "<<count<<" " << prod[j-1]<< "    ->    " << prod[j] <<endl;
 					if(count == 0) {
 						break;
 					}
 					else if(val == -1) val = count;
 					else { // to check for more then a pair
-						if(count < val) break;
+						if(count < val) {
+							val = count;
+						}
 					}
 				} 
 
@@ -811,7 +817,7 @@ Grammar::leftFactor(){
 					//4. Add new prods in new NT
 
 					string front,back;
-					substr_token(prod[i],count,front,back);
+					substr_token(prod[i],val,front,back);
 					string new_nt_name = generateName(it->first);
 
 					// 2    
@@ -821,7 +827,7 @@ Grammar::leftFactor(){
 					// 1 & 4
 					for(int k=i;k<j;k++){ // Make new NT and change the current productions
 						string start,end;
-						substr_token(prod[k],count,start,end);
+						substr_token(prod[k],val,start,end);
 						//new_nt.addProductions(end);
 						new_nt.productions.push_back(end);
 					}

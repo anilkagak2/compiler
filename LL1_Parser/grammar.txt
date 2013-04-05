@@ -3,16 +3,15 @@
 %%
 
 E
-	: E + T
-	| T
+	: id id T
+	| id + id
+	| id id F
 	;
 
 T
-	: T F
-	| EPS
+	: EPS
 	;
 
 F
-	: ( E )
-	| id
+	: EPS
 	;
