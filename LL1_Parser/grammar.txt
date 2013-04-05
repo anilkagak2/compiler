@@ -23,8 +23,8 @@ translation_unit
 ;
 
 external_declaration
-: function_definition
-| declaration
+: type_specifiers declarator compound_statement
+| type_specifiers declarator ;
 ;
 
 function_definition
@@ -57,14 +57,8 @@ identifier_list
 compound_statement
 : { }
 | { statement_list }
-| { declaration_list }
-| { declaration_list statement_list }
 ;
 
-declaration_list
-: declaration
-| declaration_list declaration
-;
 
 declaration
 : type_specifiers declarator ;
@@ -76,7 +70,8 @@ statement_list
 ;
 
 statement
-: compound_statement
+: declaration
+| compound_statement
 | expression_statement
 | selection_statement
 | iteration_statement
@@ -180,7 +175,7 @@ conditional_expression
 
 assignment_expression
 : conditional_expression
-| IDENTIFIER assignment_operator assignment_expression
+| conditional_expression assignment_operator assignment_expression
 ;
 
 
