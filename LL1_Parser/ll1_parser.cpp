@@ -373,7 +373,7 @@ void Grammar::parse(string input){
 //	cout <<"input: "<< input <<endl;
     queue<string> q = splitstr_queue(input);
 	stack<string> s;
-
+    int lineno = 1;
 	q.push(dollar);
 	s.push(dollar);
     s.push(start);
@@ -382,19 +382,23 @@ void Grammar::parse(string input){
 	    //cout << s.top() <<endl;
 	    cout << "Next Input Symbol: " << q.front()<<endl;
         printStack(s);
-        if(s.top() == q.front()){
+        if( q.front() == "NEWLINE"){
+            lineno++;
+            q.pop();
+        }
+        else if(s.top() == q.front()){
 		    s.pop();
 		    q.pop();
 	    } 
 	    else if( nonTerminals.find(s.top()) != nonTerminals.end() ){ // Stack has Nonterminal
 		    if((!isTerminal(q.front())) && q.front() != dollar){
-			    printf("Error occured in parsing input file: %s\n",q.front ().c_str ());
+			    printf("line no: %d :Error occured in parsing input file: %s\n",lineno,q.front ().c_str ());
 			    return;
 		    }
 
 		    if(nonTerminals[s.top ()].parseTable.find(q.front()) == nonTerminals[s.top()].parseTable.end()){
 
-			    printf("Terminal: %s not found for nonTerminal: %s \n",q.front().c_str(),s.top ().c_str ());
+			    printf("line no: %d Terminal: %s not found for nonTerminal: %s \n",lineno,q.front().c_str(),s.top ().c_str ());
 			    return;
 		    }
 
@@ -414,7 +418,7 @@ void Grammar::parse(string input){
 		    }
 	    }
 	    else{ // error
-		    printf("Error occured , stack does not contain terminal and Nonterminal: %s\n",q.front ().c_str ());
+		    printf("line no: %d Error occured , stack does not contain terminal and Nonterminal: %s\n",lineno,q.front ().c_str ());
 		    return;
 	    }
     }
