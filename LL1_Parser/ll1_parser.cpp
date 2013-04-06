@@ -370,7 +370,7 @@ void printStack( stack<string> s){
 //Tokenised, space separated input is assumed
 //eg: Id plus whitespace etc
 void Grammar::parse(string input){
-	cout <<"input: "<< input <<endl;
+//	cout <<"input: "<< input <<endl;
     queue<string> q = splitstr_queue(input);
 	stack<string> s;
 
@@ -612,19 +612,22 @@ Grammar::Grammar(string fileName){
 	printTerminals();
 
 	cout << "Before removing left recursion " <<  endl;
-	//printProductions ();
+	printProductions ();
 	removeIndirectLeftRecursion ();
 
+	cout << "------------------------------------" << endl;
 	cout << "After removing left recursion " <<  endl;
-	//printProductions ();
+	printProductions ();
+	cout << "------------------------------------" << endl;
 	leftFactor();
 	cout << "After removing left Factoring " <<  endl;
-//	printProductions ();
+	printProductions ();
+	cout << "------------------------------------" << endl;
 	calcNullable ();
 	populateFirst();
-	cout << "Populate First " <<  endl;
+	cout << "Populate First DONE " <<  endl;
 
-    populateFollow();
+	populateFollow();
 	makeParse(); 
 }
 

@@ -32,7 +32,8 @@ VOLATILE		$volatile$
 WHILE			$while$
 CONSTANT		$([0-9][0-9]*)$
 FCONSTANT       $([0-9][0-9]*.[0-9][0-9]*)$
-WHITESPACE		$$|\t|\n$
+WHITESPACE		$$|\t$
+NEWLINE			$\n$
 IDENTIFIER		$([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*$
 
 PDEFINE			$\#define$

@@ -161,8 +161,9 @@ void lex() {
 		//string output(input[current],input[current+max_advance]);
 		//cout << "< "<<token_class[accepting_dfa] <<" , "<<output<<" >" << endl;
 	//	cout<<output<<endl;
-		if(output != "\n" && output != "\t" && output != " ") 
-		of <<token_class[accepting_dfa]<< endl;
+		if (output == "\n") of << endl;
+		else if(output != "\t" && output != " ") 
+			of <<token_class[accepting_dfa]<< " ";
 
 		current += max_advance;
 
