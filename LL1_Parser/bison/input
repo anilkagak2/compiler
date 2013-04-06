@@ -1,0 +1,8 @@
+int b = 4;
+int a = 3;
+
+
+void function () {
+	a = b;
+	printf ("Hello world");
+}
