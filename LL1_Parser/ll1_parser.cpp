@@ -885,24 +885,28 @@ Grammar::leftFactor(){
 						string start,end;
 						substr_token(prod[k],val,start,end);
 						//new_nt.addProductions(end);
-						new_nt.productions.push_back(end);
-					}
+                        end = trim(end);
+                        //if(end.empty()) 
+                        //    new_nt.productions.push_back(EPSILON);
+                        //else
+                            new_nt.productions.push_back(end);
+                    }
 
-					// 3
-					new_nt_map[new_nt_name] = new_nt;
-				}
-				i = j;
-			}
+                    // 3
+                    new_nt_map[new_nt_name] = new_nt;
+                }
+                i = j;
+            }
 
-			(it->second).productions = new_prod;
-		}
+            (it->second).productions = new_prod;
+        }
 
-		// Break Condition
-		if(new_nt_map.empty())break;
-		else{ // TODO: add new_nt_map to total_nt_map
-			total_nt_map.insert(new_nt_map.begin(),new_nt_map.end());
-			new_nt_map.clear();
-		}
-	}
-	nonTerminals = total_nt_map;
+        // Break Condition
+        if(new_nt_map.empty())break;
+        else{ // TODO: add new_nt_map to total_nt_map
+            total_nt_map.insert(new_nt_map.begin(),new_nt_map.end());
+            new_nt_map.clear();
+        }
+    }
+    nonTerminals = total_nt_map;
 }

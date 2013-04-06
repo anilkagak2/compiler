@@ -76,30 +76,26 @@ statement
 | selection_statement
 | iteration_statement
 | jump_statement
+| IDENTIFIER ( )
+| IDENTIFIER ( identifier_list )
 ;
 
 selection_statement
-: IF ( assignment_expression ) statement
-| IF ( assignment_expression ) statement ELSE statement
+: IF ( logical_or_expression ) statement
+| IF ( logical_or_expression ) statement ELSE statement
 ;
 
 iteration_statement
-: WHILE ( expression ) statement
-| DO statement WHILE ( expression ) ;
-| FOR ( expression_statement expression_statement ) statement
-| FOR ( expression_statement expression_statement assignment_expression ) statement
+: WHILE ( logical_or_expression ) statement
+| DO statement WHILE ( logical_or_expression ) ;
+| FOR ( assignment_expression ; logical_or_expression ; assignment_expression ) statement
 ;
 
 jump_statement
 | CONTINUE ;
 | BREAK ;
 | RETURN ;
-| RETURN assignment_expression ;
-;
-
-expression_statement
-: ;
-| assignment_expression ;
+| RETURN logical_or_expression ;
 ;
 
 primary_expression
@@ -174,9 +170,15 @@ conditional_expression
 ;
 
 assignment_expression
-: conditional_expression
-| conditional_expression assignment_operator assignment_expression
+: IDENTIFIER assignment_operator logical_or_expression
 ;
+
+
+expression_statement
+: ;
+| assignment_expression ;
+;
+
 
 
 assignment_operator
