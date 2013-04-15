@@ -6,11 +6,14 @@ extern char yytext[];
 extern int yylineno;
 extern int column;
 
+const char *constNames[] = { "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7" };   
 char *Names[] = { "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7" };   
 char **Namep  = Names;   
 char *newname() ;
 void freename();
+
 void count();
+void calOp (char *result, char *op1, char *op2, char *operator);
 %}
 
 %union {char id[100];}
@@ -53,8 +56,18 @@ postfix_expression
 	| postfix_expression '(' argument_expression_list ')'
 	| postfix_expression '.' IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP {/*strcpy ($$, $1); strcat ($$, "")*/}
-	| postfix_expression DEC_OP
+	| postfix_expression INC_OP {
+		char *eqFree = newname ();
+		printf ("%s = %s\n", eqFree, $1);
+		strcpy ($$, eqFree);
+		printf ("%s = %s + 1\n", $1, $1);
+       	}
+	| postfix_expression DEC_OP {
+		char *eqFree = newname ();
+		printf ("%s = %s\n", eqFree, $1);
+		strcpy ($$, eqFree);
+		printf ("%s = %s - 1\n", $1, $1);
+       	}
 	;
 
 argument_expression_list
@@ -82,49 +95,66 @@ unary_operator
 
 cast_expression
 	: unary_expression
-	| '(' type_name ')' cast_expression
+	| '(' type_name ')' cast_expression {strcpy ($$,$4);}
 	;
 
 multiplicative_expression
 	: cast_expression
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
+	| multiplicative_expression '*' cast_expression {
+	  calOp ($$, $1, $3, "*");
+	}
+	| multiplicative_expression '/' cast_expression {
+	  calOp ($$, $1, $3, "/");
+	}
+	| multiplicative_expression '%' cast_expression {
+	  calOp ($$, $1, $3, "%");
+	}
 	;
 
 additive_expression
 	: multiplicative_expression
 	| additive_expression '+' multiplicative_expression {
-	  const char *t0 = newname ();
-	  const char *t1 = newname ();
-	  printf ("%s = %s \n", t0, $1);
-	  printf ("%s = %s \n", t1, $3);
-	  printf ("%s = %s + %s \n",t0, t0 , t1);
-	  strcpy ($$, t0);
-	  freename (t0);
-	  freename (t1);
+	  calOp ($$, $1, $3, "+");
 	}
-	| additive_expression '-' multiplicative_expression
+	| additive_expression '-' multiplicative_expression {
+	  calOp ($$, $1, $3, "-");
+	}
 	;
 
 shift_expression
 	: additive_expression
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
+	| shift_expression LEFT_OP additive_expression {
+	  calOp ($$, $1, $3, "<<");
+	}
+	| shift_expression RIGHT_OP additive_expression {
+	  calOp ($$, $1, $3, ">>");
+	}
 	;
 
 relational_expression
 	: shift_expression
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
+	| relational_expression '<' shift_expression {
+	  calOp ($$, $1, $3, "<");
+	}
+	| relational_expression '>' shift_expression {
+	  calOp ($$, $1, $3, ">");
+	}
+	| relational_expression LE_OP shift_expression {
+	  calOp ($$, $1, $3, "<=");
+	}
+	| relational_expression GE_OP shift_expression {
+	  calOp ($$, $1, $3, ">=");
+	}
 	;
 
 equality_expression
 	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	| equality_expression EQ_OP relational_expression {
+	  calOp ($$, $1, $3, "==");
+	}
+	| equality_expression NE_OP relational_expression {
+	  calOp ($$, $1, $3, "!=");
+	}
 	;
 
 and_expression
@@ -159,7 +189,11 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression
-	| unary_expression assignment_operator assignment_expression        { printf("%s %s %s \n",$1,$2,$3); } 
+	| unary_expression assignment_operator assignment_expression { 
+		printf("%s %s %s \n",$1,$2,$3);
+		memcpy(Names,constNames,sizeof(constNames));
+	       	Namep = Names;
+       	} 
 	;
 
 assignment_operator
@@ -206,7 +240,11 @@ init_declarator_list
 
 init_declarator
 	: declarator
-	| declarator '=' initializer
+	| declarator '=' initializer {
+		printf ("%s = %s \n", $1,$3);
+		memcpy(Names,constNames,sizeof(constNames));
+	       	Namep = Names;
+	}
 	;
 
 storage_class_specifier
@@ -412,7 +450,9 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
+	: IF '(' expression ')' statement{
+		printf("IF %s then \n ",$3);
+	}
 	| IF '(' expression ')' statement ELSE statement
 	| SWITCH '(' expression ')' statement
 	;
@@ -470,6 +510,17 @@ void freename(s)
 		fprintf(stderr, "%d: (Internal error) Name stack underflow\n",   
 				yylineno );   
 }   
+
+void calOp (char *result, char *op1, char *op2, char *operator) {
+	  const char *t0 = newname ();
+	  const char *t1 = newname ();
+	  printf ("%s = %s \n", t0, op1);
+	  printf ("%s = %s \n", t1, op2);
+	  printf ("%s = %s %s %s \n",t0, t0, operator, t1);
+	  strcpy (result, t0);
+	  freename (t1);
+	  freename (t0);
+}
 
 yyerror(s)
 	char *s;

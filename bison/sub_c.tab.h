@@ -105,7 +105,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 16 "sub_c.y"
+#line 19 "sub_c.y"
 char id[100];
 
 

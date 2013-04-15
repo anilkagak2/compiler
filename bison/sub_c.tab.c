@@ -75,15 +75,18 @@ extern char yytext[];
 extern int yylineno;
 extern int column;
 
+const char *constNames[] = { "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7" };   
 char *Names[] = { "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7" };   
 char **Namep  = Names;   
 char *newname() ;
 void freename();
+
 void count();
+void calOp (char *result, char *op1, char *op2, char *operator);
 
 
 /* Line 268 of yacc.c  */
-#line 87 "sub_c.tab.c"
+#line 90 "sub_c.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -178,12 +181,12 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 16 "sub_c.y"
+#line 19 "sub_c.y"
 char id[100];
 
 
 /* Line 293 of yacc.c  */
-#line 187 "sub_c.tab.c"
+#line 190 "sub_c.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -195,7 +198,7 @@ char id[100];
 
 
 /* Line 343 of yacc.c  */
-#line 199 "sub_c.tab.c"
+#line 202 "sub_c.tab.c"
 
 #ifdef short
 # undef short
@@ -573,28 +576,28 @@ static const yytype_int16 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    43,    43,    44,    45,    46,    50,    51,    52,    53,
-      54,    55,    56,    57,    61,    62,    66,    67,    68,    69,
-      70,    71,    75,    76,    77,    78,    79,    80,    84,    85,
-      89,    90,    91,    92,    96,    97,   107,   111,   112,   113,
-     117,   118,   119,   120,   121,   125,   126,   127,   131,   132,
-     136,   137,   141,   142,   146,   147,   151,   152,   156,   157,
-     161,   162,   166,   167,   168,   169,   170,   171,   172,   173,
-     174,   175,   176,   180,   181,   185,   189,   190,   194,   195,
-     196,   197,   198,   199,   203,   204,   208,   209,   213,   214,
-     215,   216,   217,   221,   222,   223,   224,   225,   226,   227,
-     228,   229,   230,   231,   232,   236,   237,   238,   242,   243,
-     247,   248,   252,   256,   257,   258,   259,   263,   264,   268,
-     269,   270,   274,   275,   276,   280,   281,   285,   286,   290,
-     291,   295,   296,   300,   301,   302,   303,   304,   305,   306,
-     310,   311,   312,   313,   317,   318,   323,   324,   328,   329,
-     333,   334,   335,   339,   340,   344,   345,   349,   350,   351,
-     355,   356,   357,   358,   359,   360,   361,   362,   363,   367,
-     368,   369,   373,   374,   378,   379,   380,   381,   382,   383,
-     387,   388,   389,   393,   394,   395,   396,   400,   401,   405,
-     406,   410,   411,   415,   416,   417,   421,   422,   423,   424,
-     428,   429,   430,   431,   432,   436,   437,   441,   442,   446,
-     447,   448,   449
+       0,    46,    46,    47,    48,    49,    53,    54,    55,    56,
+      57,    58,    59,    65,    74,    75,    79,    80,    81,    82,
+      83,    84,    88,    89,    90,    91,    92,    93,    97,    98,
+     102,   103,   106,   109,   115,   116,   119,   125,   126,   129,
+     135,   136,   139,   142,   145,   151,   152,   155,   161,   162,
+     166,   167,   171,   172,   176,   177,   181,   182,   186,   187,
+     191,   192,   200,   201,   202,   203,   204,   205,   206,   207,
+     208,   209,   210,   214,   215,   219,   223,   224,   228,   229,
+     230,   231,   232,   233,   237,   238,   242,   243,   251,   252,
+     253,   254,   255,   259,   260,   261,   262,   263,   264,   265,
+     266,   267,   268,   269,   270,   274,   275,   276,   280,   281,
+     285,   286,   290,   294,   295,   296,   297,   301,   302,   306,
+     307,   308,   312,   313,   314,   318,   319,   323,   324,   328,
+     329,   333,   334,   338,   339,   340,   341,   342,   343,   344,
+     348,   349,   350,   351,   355,   356,   361,   362,   366,   367,
+     371,   372,   373,   377,   378,   382,   383,   387,   388,   389,
+     393,   394,   395,   396,   397,   398,   399,   400,   401,   405,
+     406,   407,   411,   412,   416,   417,   418,   419,   420,   421,
+     425,   426,   427,   431,   432,   433,   434,   438,   439,   443,
+     444,   448,   449,   453,   456,   457,   461,   462,   463,   464,
+     468,   469,   470,   471,   472,   476,   477,   481,   482,   486,
+     487,   488,   489
 };
 #endif
 
@@ -1988,121 +1991,270 @@ yyreduce:
         case 5:
 
 /* Line 1806 of yacc.c  */
-#line 46 "sub_c.y"
+#line 49 "sub_c.y"
     {strcpy ((yyval.id), (yyvsp[(2) - (3)].id));}
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 56 "sub_c.y"
-    {/*strcpy ($$, $1); strcat ($$, "")*/}
+#line 59 "sub_c.y"
+    {
+		char *eqFree = newname ();
+		printf ("%s = %s\n", eqFree, (yyvsp[(1) - (2)].id));
+		strcpy ((yyval.id), eqFree);
+		printf ("%s = %s + 1\n", (yyvsp[(1) - (2)].id), (yyvsp[(1) - (2)].id));
+       	}
+    break;
+
+  case 13:
+
+/* Line 1806 of yacc.c  */
+#line 65 "sub_c.y"
+    {
+		char *eqFree = newname ();
+		printf ("%s = %s\n", eqFree, (yyvsp[(1) - (2)].id));
+		strcpy ((yyval.id), eqFree);
+		printf ("%s = %s - 1\n", (yyvsp[(1) - (2)].id), (yyvsp[(1) - (2)].id));
+       	}
+    break;
+
+  case 29:
+
+/* Line 1806 of yacc.c  */
+#line 98 "sub_c.y"
+    {strcpy ((yyval.id),(yyvsp[(4) - (4)].id));}
+    break;
+
+  case 31:
+
+/* Line 1806 of yacc.c  */
+#line 103 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "*");
+	}
+    break;
+
+  case 32:
+
+/* Line 1806 of yacc.c  */
+#line 106 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "/");
+	}
+    break;
+
+  case 33:
+
+/* Line 1806 of yacc.c  */
+#line 109 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "%");
+	}
     break;
 
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 97 "sub_c.y"
+#line 116 "sub_c.y"
     {
-	  const char *t0 = newname ();
-	  const char *t1 = newname ();
-	  printf ("%s = %s \n", t0, (yyvsp[(1) - (3)].id));
-	  printf ("%s = %s \n", t1, (yyvsp[(3) - (3)].id));
-	  printf ("%s = %s + %s \n",t0, t0 , t1);
-	  strcpy ((yyval.id), t0);
-	  freename (t0);
-	  freename (t1);
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "+");
+	}
+    break;
+
+  case 36:
+
+/* Line 1806 of yacc.c  */
+#line 119 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "-");
+	}
+    break;
+
+  case 38:
+
+/* Line 1806 of yacc.c  */
+#line 126 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "<<");
+	}
+    break;
+
+  case 39:
+
+/* Line 1806 of yacc.c  */
+#line 129 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), ">>");
+	}
+    break;
+
+  case 41:
+
+/* Line 1806 of yacc.c  */
+#line 136 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "<");
+	}
+    break;
+
+  case 42:
+
+/* Line 1806 of yacc.c  */
+#line 139 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), ">");
+	}
+    break;
+
+  case 43:
+
+/* Line 1806 of yacc.c  */
+#line 142 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "<=");
+	}
+    break;
+
+  case 44:
+
+/* Line 1806 of yacc.c  */
+#line 145 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), ">=");
+	}
+    break;
+
+  case 46:
+
+/* Line 1806 of yacc.c  */
+#line 152 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "==");
+	}
+    break;
+
+  case 47:
+
+/* Line 1806 of yacc.c  */
+#line 155 "sub_c.y"
+    {
+	  calOp ((yyval.id), (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id), "!=");
 	}
     break;
 
   case 61:
 
 /* Line 1806 of yacc.c  */
-#line 162 "sub_c.y"
-    { printf("%s %s %s \n",(yyvsp[(1) - (3)].id),(yyvsp[(2) - (3)].id),(yyvsp[(3) - (3)].id)); }
+#line 192 "sub_c.y"
+    { 
+		printf("%s %s %s \n",(yyvsp[(1) - (3)].id),(yyvsp[(2) - (3)].id),(yyvsp[(3) - (3)].id));
+		memcpy(Names,constNames,sizeof(constNames));
+	       	Namep = Names;
+       	}
     break;
 
   case 62:
 
 /* Line 1806 of yacc.c  */
-#line 166 "sub_c.y"
+#line 200 "sub_c.y"
     { strcpy ((yyval.id), "=");}
     break;
 
   case 63:
 
 /* Line 1806 of yacc.c  */
-#line 167 "sub_c.y"
+#line 201 "sub_c.y"
     { strcpy ((yyval.id), "*=");}
     break;
 
   case 64:
 
 /* Line 1806 of yacc.c  */
-#line 168 "sub_c.y"
+#line 202 "sub_c.y"
     { strcpy ((yyval.id), "/=");}
     break;
 
   case 65:
 
 /* Line 1806 of yacc.c  */
-#line 169 "sub_c.y"
+#line 203 "sub_c.y"
     { strcpy ((yyval.id), "%=");}
     break;
 
   case 66:
 
 /* Line 1806 of yacc.c  */
-#line 170 "sub_c.y"
+#line 204 "sub_c.y"
     { strcpy ((yyval.id), "+=");}
     break;
 
   case 67:
 
 /* Line 1806 of yacc.c  */
-#line 171 "sub_c.y"
+#line 205 "sub_c.y"
     { strcpy ((yyval.id), "-=");}
     break;
 
   case 68:
 
 /* Line 1806 of yacc.c  */
-#line 172 "sub_c.y"
+#line 206 "sub_c.y"
     { strcpy ((yyval.id), "<<=");}
     break;
 
   case 69:
 
 /* Line 1806 of yacc.c  */
-#line 173 "sub_c.y"
+#line 207 "sub_c.y"
     { strcpy ((yyval.id), ">>=");}
     break;
 
   case 70:
 
 /* Line 1806 of yacc.c  */
-#line 174 "sub_c.y"
+#line 208 "sub_c.y"
     { strcpy ((yyval.id), "&=");}
     break;
 
   case 71:
 
 /* Line 1806 of yacc.c  */
-#line 175 "sub_c.y"
+#line 209 "sub_c.y"
     { strcpy ((yyval.id), "^=");}
     break;
 
   case 72:
 
 /* Line 1806 of yacc.c  */
-#line 176 "sub_c.y"
+#line 210 "sub_c.y"
     { strcpy ((yyval.id), "|=");}
+    break;
+
+  case 87:
+
+/* Line 1806 of yacc.c  */
+#line 243 "sub_c.y"
+    {
+		printf ("%s = %s \n", (yyvsp[(1) - (3)].id),(yyvsp[(3) - (3)].id));
+		memcpy(Names,constNames,sizeof(constNames));
+	       	Namep = Names;
+	}
+    break;
+
+  case 193:
+
+/* Line 1806 of yacc.c  */
+#line 453 "sub_c.y"
+    {
+		printf("IF %s then \n ",(yyvsp[(3) - (5)].id));
+	}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 2106 "sub_c.tab.c"
+#line 2258 "sub_c.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2333,7 +2485,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 452 "sub_c.y"
+#line 492 "sub_c.y"
 
 char  *newname()   
 {   
@@ -2355,6 +2507,17 @@ void freename(s)
 		fprintf(stderr, "%d: (Internal error) Name stack underflow\n",   
 				yylineno );   
 }   
+
+void calOp (char *result, char *op1, char *op2, char *operator) {
+	  const char *t0 = newname ();
+	  const char *t1 = newname ();
+	  printf ("%s = %s \n", t0, op1);
+	  printf ("%s = %s \n", t1, op2);
+	  printf ("%s = %s %s %s \n",t0, t0, operator, t1);
+	  strcpy (result, t0);
+	  freename (t1);
+	  freename (t0);
+}
 
 yyerror(s)
 	char *s;
