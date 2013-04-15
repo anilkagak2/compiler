@@ -7,36 +7,26 @@
 void count();
 %}
 
-%union {char id[100];}
+%union {char id;}
 %token <id> IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
-%token <id> PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
-%token <id> AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
-%token <id> SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
-%token <id> XOR_ASSIGN OR_ASSIGN TYPE_NAME
-%token <id> '$' '&' '(' ')' '+' '-' '/' '!' '[' ']' '~' '#' '*' ',' '.' ':' '{' '}' '<' '>' '=' ';'
-%token <id> TYPEDEF EXTERN STATIC AUTO REGISTER
-%token <id> CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
-%token <id> STRUCT UNION ENUM ELLIPSIS
+%token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
+%token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
+%token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
+%token XOR_ASSIGN OR_ASSIGN TYPE_NAME
 
-%token <id> CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+%token TYPEDEF EXTERN STATIC AUTO REGISTER
+%token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
+%token STRUCT UNION ENUM ELLIPSIS
 
-%type <id> constant_expression declaration declaration_specifiers init_declarator_list init_declarator storage_class_specifier
-%type <id> type_specifier struct_or_union_specifier struct_or_union struct_declaration_list struct_declaration specifier_qualifier_list
-%type <id> struct_declarator_list struct_declarator enum_specifier enumerator_list enumerator type_qualifier declarator
-%type <id> direct_declarator pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list
-%type <id> type_name abstract_declarator direct_abstract_declarator initializer initializer_list statement labeled_statement
-%type <id> compound_statement declaration_list statement_list expression_statement selection_statement iteration_statement
-%type <id> jump_statement translation_unit external_declaration function_definition expression assignment_expression conditional_expression
-%type <id> logical_or_expression logical_and_expression inclusive_or_expression exclusive_or_expression and_expression equality_expression
-%type <id> relational_expression shift_expression additive_expression multiplicative_expression cast_expression unary_operator
-%type <id> unary_expression argument_expression_list postfix_expression primary_expression assignment_operator
+%token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+
 %start translation_unit
 %%
 
 primary_expression
-	: IDENTIFIER            /*{printf("%s \n",$1);}*/
-	| CONSTANT              /*{printf("%s \n",$1);}*/
-	| STRING_LITERAL
+	: IDENTIFIER            {printf(" id %d \n",$1);}
+	| CONSTANT              {printf(" constant %d \n",$1);}
+	| STRING_LITERAL           {printf("string");}
 	| '(' expression ')'
 	;
 
@@ -144,7 +134,7 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression
-	| unary_expression assignment_operator assignment_expression        { printf("%s %s %s",$1,$2,$3); } 
+	| unary_expression assignment_operator assignment_expression
 	;
 
 assignment_operator
@@ -376,7 +366,7 @@ labeled_statement
 
 compound_statement
 	: '{' '}'
-	| '{' statement_list '}'
+	| '{' statement_list '}'        {printf("statements");}
 	| '{' declaration_list '}'
 	| '{' declaration_list statement_list '}'
 	;

@@ -1,8 +1,4 @@
-int b = 4;
-int a = 3;
-
-
 void function () {
-	a = b;
+	a = 10;
 	printf ("Hello world");
 }

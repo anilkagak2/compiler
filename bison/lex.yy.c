@@ -1071,43 +1071,43 @@ YY_RULE_SETUP
 case 34:
 YY_RULE_SETUP
 #line 58 "sub_c.l"
-{ count(); yylval.id = yytext[0]; return(check_type()); }
+{ count(); strcpy(yylval.id ,yytext); return(check_type()); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 60 "sub_c.l"
-{ count(); return(CONSTANT); }
+{ count(); strcpy(yylval.id ,yytext); return(CONSTANT); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 61 "sub_c.l"
-{ count(); return(CONSTANT); }
+{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
 #line 62 "sub_c.l"
-{ count(); return(CONSTANT); }
+{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
 #line 63 "sub_c.l"
-{ count(); return(CONSTANT); }
+{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 65 "sub_c.l"
-{ count(); return(CONSTANT); }
+{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 66 "sub_c.l"
-{ count(); return(CONSTANT); }
+{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 67 "sub_c.l"
-{ count(); return(CONSTANT); }
+{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 	YY_BREAK
 case 42:
 /* rule 42 can match eol */
