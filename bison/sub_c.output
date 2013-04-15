@@ -1,4 +1,4 @@
-Terminals which are not used
+Terminals unused in grammar
 
    '$'
    '#'
@@ -437,8 +437,8 @@ init_declarator (112)
 storage_class_specifier (113)
     on left: 87 88 89 90 91, on right: 77 78
 type_specifier (114)
-    on left: 92 93 94 95 96 97 98 99 100 101 102 103,
-    on right: 79 80 112 113
+    on left: 92 93 94 95 96 97 98 99 100 101 102 103, on right: 79
+    80 112 113
 struct_or_union_specifier (115)
     on left: 104 105 106, on right: 101
 struct_or_union (116)

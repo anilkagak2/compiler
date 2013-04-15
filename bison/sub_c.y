@@ -1,9 +1,15 @@
 %{
 #include <stdio.h>
 #include <string.h>
-//#include <iostream>
-//#include "sub_c.tab.h"
-//using namespace std;
+#include <stdlib.h>
+extern char yytext[];
+extern int yylineno;
+extern int column;
+
+char *Names[] = { "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7" };   
+char **Namep  = Names;   
+char *newname() ;
+void freename();
 void count();
 %}
 
@@ -37,7 +43,7 @@ primary_expression
 	: IDENTIFIER            /*{printf("%s \n",$1);}*/
 	| CONSTANT              /*{printf("%s \n",$1);}*/
 	| STRING_LITERAL
-	| '(' expression ')'
+	| '(' expression ')' 	{strcpy ($$, $2);}
 	;
 
 postfix_expression
@@ -47,7 +53,7 @@ postfix_expression
 	| postfix_expression '(' argument_expression_list ')'
 	| postfix_expression '.' IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP
+	| postfix_expression INC_OP {/*strcpy ($$, $1); strcat ($$, "")*/}
 	| postfix_expression DEC_OP
 	;
 
@@ -88,7 +94,16 @@ multiplicative_expression
 
 additive_expression
 	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression
+	| additive_expression '+' multiplicative_expression {
+	  const char *t0 = newname ();
+	  const char *t1 = newname ();
+	  printf ("%s = %s \n", t0, $1);
+	  printf ("%s = %s \n", t1, $3);
+	  printf ("%s = %s + %s \n",t0, t0 , t1);
+	  strcpy ($$, t0);
+	  freename (t0);
+	  freename (t1);
+	}
 	| additive_expression '-' multiplicative_expression
 	;
 
@@ -144,21 +159,21 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression
-	| unary_expression assignment_operator assignment_expression        { printf("%s %s %s",$1,$2,$3); } 
+	| unary_expression assignment_operator assignment_expression        { printf("%s %s %s \n",$1,$2,$3); } 
 	;
 
 assignment_operator
-	: '='
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	: '='		{ strcpy ($$, "=");}
+	| MUL_ASSIGN 	{ strcpy ($$, "*=");}
+	| DIV_ASSIGN 	{ strcpy ($$, "/=");}
+	| MOD_ASSIGN 	{ strcpy ($$, "%=");}
+	| ADD_ASSIGN 	{ strcpy ($$, "+=");}
+	| SUB_ASSIGN 	{ strcpy ($$, "-=");}
+	| LEFT_ASSIGN 	{ strcpy ($$, "<<=");}
+	| RIGHT_ASSIGN 	{ strcpy ($$, ">>=");}
+	| AND_ASSIGN 	{ strcpy ($$, "&=");}
+	| XOR_ASSIGN	{ strcpy ($$, "^=");}
+	| OR_ASSIGN 	{ strcpy ($$, "|=");}
 	;
 
 expression
@@ -435,18 +450,34 @@ function_definition
 	;
 
 %%
-#include <stdio.h>
+char  *newname()   
+{   
+	if( Namep >= &Names[ sizeof(Names)/sizeof(*Names) ] )   
+	{   
+		fprintf( stderr, "%d: Expression too complex\n", yylineno );   
+		exit( 1 );   
+	}   
 
-extern char yytext[];
-extern int column;
+	return( *Namep++ );   
+}   
+
+void freename(s)   
+	char    *s;   
+{   
+	if( Namep > Names )   
+		*--Namep = s;   
+	else   
+		fprintf(stderr, "%d: (Internal error) Name stack underflow\n",   
+				yylineno );   
+}   
 
 yyerror(s)
-char *s;
+	char *s;
 {
 	fflush(stdout);
 	printf("\n%*s\n%*s\n", column, "^", column, s);
 }
 
 int main () {
-        return yyparse ();
+	return yyparse ();
 }

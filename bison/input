@@ -1,4 +1,4 @@
 void function () {
-	a = 10;
+	a = 10 + 2;
 	printf ("Hello world");
 }
