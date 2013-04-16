@@ -450,18 +450,48 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' statement{
-		printf("IF %s then \n ",$3);
+	: IF '(' expression ')' {
+			sprintf ($<id>$, "LABEL_%d", yylineno);
+			printf ("If FALSE %s then goto %s\n", $3, $<id>$);
+	} 
+		statement ELSE {
+			printf ("%s:\n", $<id>5);
+			printf ("ELSE \n");
 	}
-	| IF '(' expression ')' statement ELSE statement
+		statement {
+			printf("ENDIF\n ");
+	}
 	| SWITCH '(' expression ')' statement
 	;
 
 iteration_statement
-	: WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' ';'
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
+	: WHILE '(' expression ')' {
+			sprintf ($<id>$, "LABEL_%d", yylineno);
+			printf ("%s-while:\n",$<id>$);
+			printf ("If FALSE %s then goto %s\n", $3, $<id>$);
+	} 
+		 statement {
+			printf ("goto %s-while\n", $<id>5);
+			printf ("%s:\n", $<id>5);
+	}
+	| DO {
+			sprintf ($<id>$, "LABEL_%d", yylineno);
+			printf ("%s:\n",$<id>$);
+	} 
+		statement WHILE '(' expression ')' ';' {
+			printf ("If %s then goto %s\n", $6, $<id>2);
+	}
+	| FOR '(' expression_statement {
+			sprintf ($<id>$, "LABEL_%d", yylineno);
+			printf ("%s-for:\n",$<id>$);
+	} expression_statement {
+			sprintf ($<id>$, "LABEL_%d", yylineno);
+			printf ("IF False %s then goto %s\n",$5,$<id>$);
+	}
+	 expression ')' statement {
+			printf ("goto %s-for\n",$<id>4);
+			printf ("%s\n",$<id>6);
+	}
 	;
 
 jump_statement
