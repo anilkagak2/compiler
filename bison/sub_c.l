@@ -66,7 +66,7 @@ L?'(\\.|[^\\'])+'	{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 {D}*"."{D}+({E})?{FS}?	{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 {D}+"."{D}*({E})?{FS}?	{ count();strcpy(yylval.id ,yytext);  return(CONSTANT); }
 
-L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
+L?\"(\\.|[^\\"])*\"	{ strcpy(yylval.id ,yytext); count(); return(STRING_LITERAL); }
 
 "..."			{ count(); return(ELLIPSIS); }
 ">>="			{ count(); return(RIGHT_ASSIGN); }

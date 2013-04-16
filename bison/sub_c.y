@@ -43,17 +43,17 @@ void calOp (char *result, char *op1, char *op2, char *operator);
 %%
 
 primary_expression
-	: IDENTIFIER            /*{printf("%s \n",$1);}*/
-	| CONSTANT              /*{printf("%s \n",$1);}*/
-	| STRING_LITERAL
+	: IDENTIFIER          	{ strcpy($$,$1); }  /*{printf("%s \n",$1);}*/
+	| CONSTANT            	{ strcpy($$,$1); }  /*{printf("%s \n",$1);}*/
+	| STRING_LITERAL 	{ strcpy($$,$1); } 
 	| '(' expression ')' 	{strcpy ($$, $2);}
 	;
 
 postfix_expression
-	: primary_expression
+	: primary_expression	{ strcpy($$,$1); } 
 	| postfix_expression '[' expression ']'
 	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
+	| postfix_expression '(' argument_expression_list ')' { printf("CALL Label_%s\n",$1); }
 	| postfix_expression '.' IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
 	| postfix_expression INC_OP {
@@ -71,12 +71,12 @@ postfix_expression
 	;
 
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression
+	: assignment_expression 	{ printf("param %s\n",$1); }
+	| assignment_expression ',' argument_expression_list { printf("param %s\n",$1); }
 	;
 
 unary_expression
-	: postfix_expression
+	: postfix_expression 		{ strcpy($$,$1); }
 	| INC_OP unary_expression
 	| DEC_OP unary_expression
 	| unary_operator cast_expression
@@ -94,12 +94,12 @@ unary_operator
 	;
 
 cast_expression
-	: unary_expression
+	: unary_expression 		{ strcpy($$,$1); }
 	| '(' type_name ')' cast_expression {strcpy ($$,$4);}
 	;
 
 multiplicative_expression
-	: cast_expression
+	: cast_expression 		{ strcpy($$,$1); }
 	| multiplicative_expression '*' cast_expression {
 	  calOp ($$, $1, $3, "*");
 	}
@@ -112,7 +112,7 @@ multiplicative_expression
 	;
 
 additive_expression
-	: multiplicative_expression
+	: multiplicative_expression  	{ strcpy($$,$1); }
 	| additive_expression '+' multiplicative_expression {
 	  calOp ($$, $1, $3, "+");
 	}
@@ -122,7 +122,7 @@ additive_expression
 	;
 
 shift_expression
-	: additive_expression
+	: additive_expression		 {strcpy($$,$1);}
 	| shift_expression LEFT_OP additive_expression {
 	  calOp ($$, $1, $3, "<<");
 	}
@@ -132,7 +132,7 @@ shift_expression
 	;
 
 relational_expression
-	: shift_expression
+	: shift_expression		 {strcpy($$,$1);}
 	| relational_expression '<' shift_expression {
 	  calOp ($$, $1, $3, "<");
 	}
@@ -148,7 +148,7 @@ relational_expression
 	;
 
 equality_expression
-	: relational_expression
+	: relational_expression		 {strcpy($$,$1);}
 	| equality_expression EQ_OP relational_expression {
 	  calOp ($$, $1, $3, "==");
 	}
@@ -158,37 +158,37 @@ equality_expression
 	;
 
 and_expression
-	: equality_expression
+	: equality_expression		 {strcpy($$,$1);}
 	| and_expression '&' equality_expression
 	;
 
 exclusive_or_expression
-	: and_expression
+	: and_expression		 {strcpy($$,$1);}
 	| exclusive_or_expression '^' and_expression
 	;
 
 inclusive_or_expression
-	: exclusive_or_expression
+	: exclusive_or_expression		 {strcpy($$,$1);}
 	| inclusive_or_expression '|' exclusive_or_expression
 	;
 
 logical_and_expression
-	: inclusive_or_expression
+	: inclusive_or_expression		 {strcpy($$,$1);}
 	| logical_and_expression AND_OP inclusive_or_expression
 	;
 
 logical_or_expression
-	: logical_and_expression
+	: logical_and_expression		 {strcpy($$,$1);}
 	| logical_or_expression OR_OP logical_and_expression
 	;
 
 conditional_expression
-	: logical_or_expression
+	: logical_or_expression		 {strcpy($$,$1);}
 	| logical_or_expression '?' expression ':' conditional_expression
 	;
 
 assignment_expression
-	: conditional_expression
+	: conditional_expression		 {strcpy($$,$1);}
 	| unary_expression assignment_operator assignment_expression { 
 		printf("%s %s %s \n",$1,$2,$3);
 		memcpy(Names,constNames,sizeof(constNames));
@@ -498,8 +498,8 @@ jump_statement
 	: GOTO IDENTIFIER ';'
 	| CONTINUE ';'
 	| BREAK ';'
-	| RETURN ';'
-	| RETURN expression ';'
+	| RETURN ';'		{ printf("RETURN\n"); }
+	| RETURN expression ';' { printf("RETURN %s\n",$2); }
 	;
 
 translation_unit
@@ -513,10 +513,30 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	| declarator declaration_list compound_statement
-	| declarator compound_statement
+	: declaration_specifiers declarator {
+		char a[50]; 
+		strcpy(a,"Label_");
+		strcat(a,$2);
+		printf("%s : \n",a);
+	} declaration_list compound_statement
+	| declaration_specifiers declarator {
+		char a[50]; 
+		strcpy(a,"Label_");
+		strcat(a,$2);
+		printf("%s : \n",a);
+	} compound_statement
+	| declarator {
+		char a[50]; 
+		strcpy(a,"Label_");
+		strcat(a,$1);
+		printf("%s : \n",a);
+	} declaration_list compound_statement
+	| declarator {
+		char a[50]; 
+		strcpy(a,"Label_");
+		strcat(a,$1);
+		printf("%s : \n",a);
+	} compound_statement
 	;
 
 %%
